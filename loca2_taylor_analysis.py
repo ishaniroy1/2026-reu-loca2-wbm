@@ -1,0 +1,119 @@
+import os
+import glob
+import numpy as np
+import xarray as xr
+import matplotlib.pyplot as plt
+import skill_metrics as sm
+
+# path to CDO-aggregated 1980-2010 baseline reference
+LIVNEH_REF = os.path.expanduser("~/LOCA2-WBM_code/livneh_monthly_1980_2010.nc")
+
+# directory with raw LOCA2-WBM downscaled model folders
+MODEL_DIR = "/net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_historical"
+
+# output location for taylor diagrams
+OUTPUT_DIR = os.path.expanduser("~/LOCA2-WBM_code/plots")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+# mapping project variables to CDO processed Livneh keys
+var_mapping = {
+    'airTmax': 'Tmax',
+    'airTmin': 'Tmin',
+    'precip': 'Prec'
+}
+
+folders = sorted(glob.glob(os.path.join(MODEL_DIR, "*_newprcp")))
+model_names = [os.path.basename(f).split('_')[0] for f in folders]
+
+# run historical validation loop per variable
+with xr.open_dataset(LIVNEH_REF) as obs_ds:
+    for model_var, livneh_var in var_mapping.items():
+        print(f"Generating Taylor Plot for {model_var}")
+
+        raw_obs_data = obs_ds[livneh_var].values.flatten()
+        obs_mask = ~np.isnan(raw_obs_data) & (raw_obs_data < 1e10) & (raw_obs_data != -9999.0)
+        obs_clean = raw_obs_data[obs_mask]
+
+        # initialize SkillMetrics tracking lists w/ baseline's perfect score
+        sdev_list = [np.std(obs_clean)]
+        crmsd_list = [0.0]
+        cc_list = [1.0]
+
+        active_models = []
+        best_model = None
+        lowest_error = float('inf')
+
+        # parse and compare each gcm folder
+        for folder, name in zip(folders, model_names):
+            model_pattern = os.path.join(folder, "monthly", model_var, "wbm_*.nc")
+            if not glob.glob(model_pattern):
+                continue
+            try:
+                with xr.open_mfdataset(model_pattern, combine='by_coords') as model_ds:
+                    model_trimmed = model_ds[model_var].sel(time=slice('1980-01-01', '2010-12-31'))
+                    obs_regrid = obs_ds[livneh_var].interp_like(model_trimmed, method='nearest')
+
+                    obs_regrid_data = obs_regrid.values.flatten()
+                    model_data = model_trimmed.values.flatten()
+
+                valid_mask = (~np.isnan(model_data) & (model_data != -9999.0) & ~np.isnan(obs_regrid_data) & (obs_regrid_data < 1e10))
+
+                m_clean = model_data[valid_mask]
+                o_clean = obs_regrid_data[valid_mask]
+                
+                if len(m_clean) == 0 or len(o_clean) == 0:
+                    continue
+
+                # numpy math
+                sdev = float(np.std(m_clean))
+                o_std = float(np.std(o_clean))
+                
+                # extract correlation scalar
+                corr = float(np.corrcoef(m_clean, o_clean)[0, 1])
+                
+                # standard CRMSD formula
+                crmsd = float(np.sqrt(sdev**2 + o_std**2 - 2 * sdev * o_std * corr))
+                
+                sdev_list.append(sdev)
+                crmsd_list.append(crmsd)
+                cc_list.append(corr)
+                active_models.append(name) 
+
+                print(f"Model: {name:<15} | Corr: {corr:.3f} | CRMSE: {crmsd:.3f}")
+
+                if crmsd < lowest_error:
+                    lowest_error = crmsd
+                    best_model = name
+
+            except Exception as e:
+                print(f"Skipping model {name} due to calculation mismatch: {e}")
+                continue
+
+        if active_models:
+            sdevs = np.array(sdev_list)
+            crmsds = np.array(crmsd_list)
+            ccs = np.array(cc_list)
+
+            plt.figure(figsize=(12,10))
+
+            sm.taylor_diagram(sdevs, crmsds, ccs,
+                markerLabel=['Observed'] + active_models,
+                markerColor='Crimson',
+                markerSymbol='o',
+                markerSize=8,
+                alpha=0.7,
+                axisMax=float(np.max(sdevs)*1.2),
+                colCOR='black',
+                colRMS='MediumSeaGreen',
+                colSTD='SlateGray',
+                styleRMS=':',
+                styleSTD='--')
+                    
+            plt.title(f'LOCA2 HIstorical Validation (1980-2010): {model_var}', y=1.08, fontsize=14, fontweight='bold')
+            plt.tight_layout()
+            output_plot = os.path.join(OUTPUT_DIR, f"{model_var}_taylor_diagram.png")
+            plt.savefig(output_plot, dpi=300)
+            plt.close()
+
+            print(f"Plot saved to {output_plot}")
+            print(f"{best_model} runs closest to observed data")
