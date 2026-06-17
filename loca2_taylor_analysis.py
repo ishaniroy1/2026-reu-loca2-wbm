@@ -4,6 +4,7 @@ import numpy as np
 import xarray as xr
 import matplotlib.pyplot as plt
 import skill_metrics as sm
+import seaborn as sns
 
 # path to CDO-aggregated 1980-2010 baseline reference
 LIVNEH_REF = os.path.expanduser("~/LOCA2-WBM_code/livneh_monthly_1980_2010.nc")
@@ -25,6 +26,20 @@ var_mapping = {
 folders = sorted(glob.glob(os.path.join(MODEL_DIR, "*_newprcp")))
 model_names = [os.path.basename(f).split('_')[0] for f in folders]
 
+# colormap and symbols for plotting (later)
+cmap = plt.get_cmap('tab20')
+symbols = ['o','s','^','D','v','P','*','X','h','<','>','p','8','d','H']
+
+MODEL_STYLE = {
+    m: {
+        'faceColor': 'w',
+        'edgeColor': cmap(i % 20),
+        'symbol': symbols[i % len(symbols)],
+        'size': 9,
+        'labelColor': 'black',
+    }
+    for i, m in enumerate(model_names)
+}
 # run historical validation loop per variable
 with xr.open_dataset(LIVNEH_REF) as obs_ds:
     for model_var, livneh_var in var_mapping.items():
@@ -97,22 +112,33 @@ with xr.open_dataset(LIVNEH_REF) as obs_ds:
             crmsds = np.array(crmsd_list)
             ccs = np.array(cc_list)
 
-            plt.figure(figsize=(12,10))
+            fig = plt.figure(figsize=(12,10))
+
+            markers_dict = {m: MODEL_STYLE[m] for m in active_models}
 
             sm.taylor_diagram(sdevs, crmsds, ccs,
-                markerLabel=['Observed'] + active_models,
-                markerColor='Crimson',
-                markerSymbol='o',
-                markerSize=8,
-                alpha=0.7,
+                markerLegend='on',
+                markers=markers_dict,
+                markerObs='o',
+                colObs='red',
+                titleOBS='Reference',
                 axisMax=float(np.max(sdevs)*1.2),
                 colCOR='black',
-                colRMS='MediumSeaGreen',
+                colRMS='RoyalBlue',
                 colSTD='SlateGray',
                 styleRMS=':',
                 styleSTD='--')
+
+            ax = plt.gca()
+            leg = ax.get_legend()
+            handles = leg.legendHandles
+            labels = [t.get_text() for t in leg.get_texts()]
+            leg.remove()
+            fig.subplots_adjust(right=0.9)
+            ax.legend(handles, labels, loc='upper right', fontsize=7,
+                    ncol=2, framealpha=0.9, title='Models', title_fontsize=8)
                     
-            plt.title(f'LOCA2 HIstorical Validation (1980-2010): {model_var}', y=1.08, fontsize=14, fontweight='bold')
+            plt.title(f'LOCA2 Historical Validation (1980-2014): {model_var}', y=1.08, fontsize=14, fontweight='bold')
             plt.tight_layout()
             output_plot = os.path.join(OUTPUT_DIR, f"{model_var}_taylor_diagram.png")
             plt.savefig(output_plot, dpi=300)
