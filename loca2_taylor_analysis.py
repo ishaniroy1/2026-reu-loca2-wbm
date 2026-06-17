@@ -55,12 +55,15 @@ with xr.open_dataset(LIVNEH_REF) as obs_ds:
 
                     obs_regrid_data = obs_regrid.values.flatten()
                     model_data = model_trimmed.values.flatten()
+                    # unit scaling for precip
+                    if model_var == 'precip':
+                        model_data = model_data*30.5 # converting mm/day rate to monthly accumulation total
 
                 valid_mask = (~np.isnan(model_data) & (model_data != -9999.0) & ~np.isnan(obs_regrid_data) & (obs_regrid_data < 1e10))
 
                 m_clean = model_data[valid_mask]
                 o_clean = obs_regrid_data[valid_mask]
-                
+
                 if len(m_clean) == 0 or len(o_clean) == 0:
                     continue
 
