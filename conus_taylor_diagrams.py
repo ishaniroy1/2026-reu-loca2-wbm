@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 import skill_metrics as sm
 import seaborn as sns
 
-# path to CDO-aggregated 1980-2010 baseline reference
-LIVNEH_REF = os.path.expanduser("~/LOCA2-WBM_code/livneh_monthly_1980_2010.nc")
+# path to CDO-aggregated 1980-2014 baseline reference
+LIVNEH_REF = os.path.expanduser("~/LOCA2-WBM_code/livneh_monthly_1980-2014.nc")
 
 # directory with raw LOCA2-WBM downscaled model folders
 MODEL_DIR = "/net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_historical"
@@ -92,9 +92,9 @@ with xr.open_dataset(LIVNEH_REF) as obs_ds:
                 # standard CRMSD formula
                 crmsd = float(np.sqrt(sdev**2 + o_std**2 - 2 * sdev * o_std * corr))
                 
-                sdev_list.append(sdev)
-                crmsd_list.append(crmsd)
-                cc_list.append(corr)
+                sdev_list.append(round(sdev, 3))
+                crmsd_list.append(round(crmsd, 3))
+                cc_list.append(round(corr, 3))
                 active_models.append(name) 
 
                 print(f"Model: {name:<15} | Corr: {corr:.3f} | CRMSE: {crmsd:.3f}")

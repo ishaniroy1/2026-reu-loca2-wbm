@@ -1,2 +1,9 @@
 *.nc
 tmp_livneh/
+shapefiles/zips/
+
+# Editor swap and temporary files
+*.swp
+*.swo
+*~
+.~.sw?
