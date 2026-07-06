@@ -6,14 +6,14 @@ import matplotlib.pyplot as plt
 import skill_metrics as sm
 import seaborn as sns
 
-# path to CDO-aggregated 1980-2014 baseline reference
-LIVNEH_REF = os.path.expanduser("~/LOCA2-WBM_code/livneh_monthly_1980-2014.nc")
+# path to CDO-aggregated 1980-2013 baseline reference
+LIVNEH_REF = os.path.expanduser("~/LOCA2-WBM_code/livneh_monthly_1980-2013.nc")
 
 # directory with raw LOCA2-WBM downscaled model folders
 MODEL_DIR = "/net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_historical"
 
 # output location for taylor diagrams
-OUTPUT_DIR = os.path.expanduser("~/LOCA2-WBM_code/plots")
+OUTPUT_DIR = os.path.expanduser("~/LOCA2-WBM_code/plots/taylor_diagrams")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # mapping project variables to CDO processed Livneh keys
@@ -64,8 +64,8 @@ with xr.open_dataset(LIVNEH_REF) as obs_ds:
             if not glob.glob(model_pattern):
                 continue
             try:
-                with xr.open_mfdataset(model_pattern, combine='by_coords') as model_ds:
-                    model_trimmed = model_ds[model_var].sel(time=slice('1980-01-01', '2010-12-31'))
+                with xr.open_mfdataset(model_pattern, combine='by_coords', data_vars='all') as model_ds:
+                    model_trimmed = model_ds[model_var].sel(time=slice('1980-01-01', '2013-12-31'))
                     obs_regrid = obs_ds[livneh_var].interp_like(model_trimmed, method='nearest')
 
                     obs_regrid_data = obs_regrid.values.flatten()
@@ -131,14 +131,14 @@ with xr.open_dataset(LIVNEH_REF) as obs_ds:
 
             ax = plt.gca()
             leg = ax.get_legend()
-            handles = leg.legendHandles
+            handles = leg.legend_handles
             labels = [t.get_text() for t in leg.get_texts()]
             leg.remove()
             fig.subplots_adjust(right=0.9)
             ax.legend(handles, labels, loc='upper right', fontsize=7,
                     ncol=2, framealpha=0.9, title='Models', title_fontsize=8)
                     
-            plt.title(f'LOCA2 Historical Validation (1980-2014): {model_var}', y=1.08, fontsize=14, fontweight='bold')
+            plt.title(f'LOCA2 Historical Validation (1980-2013): {model_var}', y=1.08, fontsize=14, fontweight='bold')
             plt.tight_layout()
             output_plot = os.path.join(OUTPUT_DIR, f"conus_{model_var}_taylor.png")
             plt.savefig(output_plot, dpi=300)
