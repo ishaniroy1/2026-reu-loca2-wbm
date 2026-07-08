@@ -2,16 +2,22 @@
 Diagnostics for high std. dev. values showing up in the Taylor Diagrams. Focuses on airTmax and the ACCESS-CM2 model.
 """
 
+from pathlib import Path
 import os
 import glob
 import numpy as np
 import xarray as xr
 import matplotlib.pyplot as plt
 
-LIVNEH_REF = os.path.expanduser("~/LOCA2-WBM_code/livneh_monthly_1980-2013.nc")
+# dynamic path resolution
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent
+
+# resolve references relative to repo root
+LIVNEH_REF = REPO_ROOT / "livneh_monthly_1980-2013.nc"
 MODEL_DIR = "/net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_historical"
-OUTPUT_DIR = os.path.expanduser("~/LOCA2-WBM_code/plots/diagnostics")
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+OUTPUT_DIR = REPO_ROOT / "plots" / "diagnostics"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 VAR = "airTmax"
 LIVNEH_VAR = "Tmax"
@@ -74,7 +80,7 @@ with xr.open_dataset(LIVNEH_REF) as obs_ds, \
             obs_da.isel(time=0).plot(ax=axes[0], cmap="RdBu_r")
             axes[0].set_title(f"Livneh {LIVNEH_VAR} (time=0)")
             model_da.isel(time=0).plot(ax=axes[1], cmap="RdBu_r")
-            axes[1].set_title(f"{first_model} {VAR} (time=0")
+            axes[1].set_title(f"{first_model} {VAR} (time=0)")
             plt.tight_layout()
             static_map_path = os.path.join(OUTPUT_DIR, f"static_map_{VAR}.png")
             plt.savefig(static_map_path, dpi=200)

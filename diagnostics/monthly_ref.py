@@ -1,7 +1,10 @@
+from pathlib import Path
 import xarray as xr
 import numpy as np
 
-ds = xr.open_dataset("livneh_monthly_reference.nc")
+BASE_DIR = Path(__file__).resolve().parent.parent
+data_path = BASE_DIR / "livneh_monthly_reference.nc"
+ds = xr.open_dataset(data_path)
 
 print("TIME DIFF (median):")
 print(ds.time.diff("time").median().values)
