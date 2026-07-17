@@ -96,7 +96,7 @@ with xr.open_mfdataset(livneh_pattern, combine='by_coords', data_vars='all') as 
 
                 if crmsd < lowest_error:
                     lowest_error = crmsd
-                    best_model = nname
+                    best_model = name
 
         except Exception as e:
             print(f"Skipping model {name} due to calculation mismatch.")
