@@ -188,7 +188,7 @@ with xr.open_dataset(LIVNEH_REF) as obs_ds:
                     
             plt.title(f'LOCA2 CONUS Historical Validation (1980-2013): {model_var}', y=1.08, fontsize=14, fontweight='bold')
             plt.tight_layout()
-            output_plot = os.path.join(OUTPUT_DIR, f"conus_{model_var}_taylor.png")
+            output_plot = os.path.join(OUTPUT_DIR, f"conus_{model_var}_monthly_taylor.png")
             plt.savefig(output_plot, dpi=300)
             plt.close()
 
