@@ -11,7 +11,7 @@ import regionmask
 # paths
 LIVNEH_REF = os.path.expanduser("~/LOCA2-WBM_code/livneh_monthly_1980-2014.nc")
 MODEL_DIR = "/net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_historical"
-OUTPUT_DIR = os.path.expanduser("~/LOCA2-WBM_code/plots")
+OUTPUT_DIR = os.path.expanduser("~/LOCA2-WBM_code/plots/taylor_diagrams/monthly")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 symbols = ['o','s','^','D','v','P','*','X','h','<','>','p','8','d','H']
 # path to US states shapefile

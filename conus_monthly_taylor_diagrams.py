@@ -15,7 +15,7 @@ LIVNEH_REF = os.path.expanduser("~/LOCA2-WBM_code/livneh_monthly_1980-2013.nc")
 MODEL_DIR = "/net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_historical"
 
 # output location for taylor diagrams
-OUTPUT_DIR = os.path.expanduser("~/LOCA2-WBM_code/plots/taylor_diagrams")
+OUTPUT_DIR = os.path.expanduser("~/LOCA2-WBM_code/plots/taylor_diagrams/monthly")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # state boundary shapefile used to clip datasets to CONUS
