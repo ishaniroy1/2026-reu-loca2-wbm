@@ -74,20 +74,54 @@ def load_conus_boundary(shapefile_path=SHAPEFILE_PATH):
     return conus_states.dissolve().geometry
 
 
-def clip_to_conus(da_or_ds, conus_geom, lat_name="lat", lon_name="lon", all_touched=True):
-    """Clip an xarray DataArray/Dataset to the CONUS boundary. Assumes lon is
-    already in -180..180 convention and lat/lon are 1-D coordinates."""
+def clip_to_conus(da_or_ds, conus_geom, lat_name=None, lon_name=None, all_touched=True):
+    """Clip an xarray DataArray/Dataset to the CONUS boundary."""
+    if lat_name is None:
+        lat_name = 'lat' if 'lat' in da_or_ds.coords else ('latitude' if 'latitude' in da_or_ds.coords else None)
+    if lon_name is None:
+        lon_name = 'lon' if 'lon' in da_or_ds.coords else ('longitude' if 'longitude' in da_or_ds.coords else None)
+    if not lat_name or not lon_name:
+        raise KeyError(f"Could not find lat/lon coordinates in dataset. Found: {list(da_or_ds.coords.keys())}")
+
+    lons = da_or_ds[lon_name].values
+    if np.any(lons > 180):
+        da_or_ds = da_or_ds.assign_coords(
+            {lon_name: np.where(da_or_ds[lon_name] > 180, da_or_ds[lon_name] - 360, da_or_ds[lon_name])}
+        )
+        da_or_ds = da_or_ds.sortby(lon_name)
+
     obj = da_or_ds.rio.write_crs("EPSG:4326", inplace=False)
     obj = obj.rio.set_spatial_dims(x_dim=lon_name, y_dim=lat_name, inplace=False)
     return obj.rio.clip(conus_geom, crs="EPSG:4326", drop=True, all_touched=all_touched)
 
 
+def normalize_precip_units(da, label):
+    """Express precipitation as a monthly accumulation (mm/month), matching
+    the convention assumed by aggregate_yearly's annual sum.
+    """
+    units = da.attrs.get('units')
+    sample_mean = float(da.isel(time=slice(0, 1)).mean(skipna=True))
+    print(f"    [units check] {label}: units='{units}', sample monthly mean={sample_mean:.4f}")
+
+    flux_units = {'kg m-2 s-1', 'kg/m2/s', 'kg m^-2 s^-1', 'mm s-1', 'mm/s'}
+    per_day_units = {'mm/day', 'mm day-1', 'mm d-1'}
+
+    if units in flux_units:
+        print(f"    [units check] {label}: converting flux -> mm/month")
+        return da * 86400 * da.time.dt.days_in_month
+    if units in per_day_units:
+        print(f"    [units check] {label}: converting mm/day -> mm/month")
+        return da * da.time.dt.days_in_month
+    return da
+
+
 def aggregate_yearly(ds, operation):
     """Slice to the 1980-2014 period and resample to annual resolution.
-    Precipitation is already a monthly accumulation (mm/month) on disk,
-    so a simple annual sum is mathematically correct."""
+    Precipitation is expected to already be a monthly accumulation
+    (mm/month) at this point (see normalize_precip_units), so a simple
+    annual sum is mathematically correct."""
     ds_sliced = ds.sel(time=slice('1980-01-01', '2014-12-31'))
-    
+
     if operation == "mean":
         return ds_sliced.resample(time='YS').mean(dim='time')
     elif operation == "sum":
@@ -112,11 +146,11 @@ for var, operation in variables_config.items():
 
     print(f"Loading Livneh monthly files for [{var}]...")
     with xr.open_mfdataset(livneh_pattern, combine='by_coords', data_vars='all') as livneh_ds:
+        if var == 'precip':
+            livneh_ds = livneh_ds.copy()
+            livneh_ds[var] = normalize_precip_units(livneh_ds[var], "Livneh")
+
         livneh_yearly = aggregate_yearly(livneh_ds, operation)
-        
-        # TEMPORARY: Checking CRS alignment
-        print(f"Raster CRS: {livneh_yearly.rio.crs}")
-        print(f"Shapefile CRS: {conus_geom.crs}")
 
         print(f"Clipping Livneh [{var}] to CONUS")
         livneh_yearly = clip_to_conus(livneh_yearly, conus_geom)
@@ -150,6 +184,10 @@ for var, operation in variables_config.items():
 
         try:
             with xr.open_mfdataset(model_pattern, combine='by_coords', data_vars='all') as model_ds:
+                if var == 'precip':
+                    model_ds = model_ds.copy()
+                    model_ds[var] = normalize_precip_units(model_ds[var], name)
+
                 model_yearly = aggregate_yearly(model_ds, operation)
                 # clip the model grid to CONUS before regridding
                 model_yearly = clip_to_conus(model_yearly, conus_geom)
