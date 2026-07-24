@@ -113,6 +113,11 @@ for var, operation in variables_config.items():
     print(f"Loading Livneh monthly files for [{var}]...")
     with xr.open_mfdataset(livneh_pattern, combine='by_coords', data_vars='all') as livneh_ds:
         livneh_yearly = aggregate_yearly(livneh_ds, operation)
+        
+        # TEMPORARY: Checking CRS alignment
+        print(f"Raster CRS: {livneh_yearly.rio.crs}")
+        print(f"Shapefile CRS: {conus_geom.crs}")
+
         print(f"Clipping Livneh [{var}] to CONUS")
         livneh_yearly = clip_to_conus(livneh_yearly, conus_geom)
         # pull into memory now so the data survives past the file closing
