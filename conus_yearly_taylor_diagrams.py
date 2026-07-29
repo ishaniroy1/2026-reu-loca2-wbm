@@ -45,6 +45,9 @@ variables_config = {
     "precip": "sum"
 }
 
+FILL_VALUE = -9999.0
+FILL_ABS_THRESHOLD = 1e10
+
 model_folders = sorted(glob.glob(os.path.join(MODEL_BASE_DIR, "*_newprcp")))
 model_names = [os.path.basename(f).split('_')[0] for f in model_folders]
 
@@ -74,6 +77,11 @@ def load_conus_boundary(shapefile_path=SHAPEFILE_PATH):
     return conus_states.dissolve().geometry
 
 
+def mask_fill_values(da):
+    """Replace known no-data sentinels with real NaN."""
+    return da.where((da != FILL_VALUE) & (np.abs(da) < FILL_ABS_THRESHOLD))
+
+
 def clip_to_conus(da_or_ds, conus_geom, lat_name=None, lon_name=None, all_touched=True):
     """Clip an xarray DataArray/Dataset to the CONUS boundary."""
     if lat_name is None:
@@ -92,13 +100,17 @@ def clip_to_conus(da_or_ds, conus_geom, lat_name=None, lon_name=None, all_touche
 
     obj = da_or_ds.rio.write_crs("EPSG:4326", inplace=False)
     obj = obj.rio.set_spatial_dims(x_dim=lon_name, y_dim=lat_name, inplace=False)
+
+    if isinstance(obj, xr.Dataset):
+        for v in obj.data_vars:
+            obj[v] = obj[v].rio.write_nodata(np.nan)
+    else:
+        obj = obj.rio.write_nodata(np.nan, inplace=False)
+
     return obj.rio.clip(conus_geom, crs="EPSG:4326", drop=True, all_touched=all_touched)
 
 
 def normalize_precip_units(da, label):
-    """Express precipitation as a monthly accumulation (mm/month), matching
-    the convention assumed by aggregate_yearly's annual sum.
-    """
     units = da.attrs.get('units')
     sample_mean = float(da.isel(time=slice(0, 1)).mean(skipna=True))
     print(f"    [units check] {label}: units='{units}', sample monthly mean={sample_mean:.4f}")
@@ -116,16 +128,12 @@ def normalize_precip_units(da, label):
 
 
 def aggregate_yearly(ds, operation):
-    """Slice to the 1980-2014 period and resample to annual resolution.
-    Precipitation is expected to already be a monthly accumulation
-    (mm/month) at this point (see normalize_precip_units), so a simple
-    annual sum is mathematically correct."""
     ds_sliced = ds.sel(time=slice('1980-01-01', '2014-12-31'))
 
     if operation == "mean":
-        return ds_sliced.resample(time='YS').mean(dim='time')
+        return ds_sliced.resample(time='YS').mean(dim='time', skipna=True)
     elif operation == "sum":
-        return ds_sliced.resample(time='YS').sum(dim='time')
+        return ds_sliced.resample(time='YS').sum(dim='time', skipna=True)
     else:
         raise ValueError(f"Unknown aggregation operation: {operation}")
 
@@ -146,8 +154,11 @@ for var, operation in variables_config.items():
 
     print(f"Loading Livneh monthly files for [{var}]...")
     with xr.open_mfdataset(livneh_pattern, combine='by_coords', data_vars='all') as livneh_ds:
+        livneh_ds = livneh_ds.copy()
+        # Scrub fill values BEFORE unit conversion / aggregation.
+        livneh_ds[var] = mask_fill_values(livneh_ds[var])
+
         if var == 'precip':
-            livneh_ds = livneh_ds.copy()
             livneh_ds[var] = normalize_precip_units(livneh_ds[var], "Livneh")
 
         livneh_yearly = aggregate_yearly(livneh_ds, operation)
@@ -160,7 +171,7 @@ for var, operation in variables_config.items():
     print(f"Yearly Livneh [{var}] dims: {dict(obs_da.sizes)}")
 
     raw_obs_data = obs_da.values.flatten()
-    obs_mask = ~np.isnan(raw_obs_data) & (raw_obs_data < 1e10) & (raw_obs_data != -9999.0)
+    obs_mask = ~np.isnan(raw_obs_data)
     obs_clean = raw_obs_data[obs_mask]
 
     if obs_clean.size == 0:
@@ -168,7 +179,7 @@ for var, operation in variables_config.items():
         continue
 
     # initialize SkillMetrics tracking lists w/ baseline's perfect score
-    sdev_list = [np.std(obs_clean)]
+    sdev_list = [round(float(np.std(obs_clean)), 3)]
     crmsd_list = [0.0]
     cc_list = [1.0]
 
@@ -184,8 +195,11 @@ for var, operation in variables_config.items():
 
         try:
             with xr.open_mfdataset(model_pattern, combine='by_coords', data_vars='all') as model_ds:
+                model_ds = model_ds.copy()
+                # Scrub fill values BEFORE unit conversion / aggregation.
+                model_ds[var] = mask_fill_values(model_ds[var])
+
                 if var == 'precip':
-                    model_ds = model_ds.copy()
                     model_ds[var] = normalize_precip_units(model_ds[var], name)
 
                 model_yearly = aggregate_yearly(model_ds, operation)
@@ -198,8 +212,7 @@ for var, operation in variables_config.items():
             model_data = model_da.values.flatten()
             obs_regrid_data = obs_regrid.values.flatten()
 
-            valid_mask = (~np.isnan(model_data) & (model_data != -9999.0) &
-                          ~np.isnan(obs_regrid_data) & (obs_regrid_data < 1e10))
+            valid_mask = ~np.isnan(model_data) & ~np.isnan(obs_regrid_data)
 
             m_clean = model_data[valid_mask]
             o_clean = obs_regrid_data[valid_mask]
@@ -241,9 +254,9 @@ for var, operation in variables_config.items():
 
     # generating taylor diagrams
     if active_models:
-        sdevs = np.array(sdev_list)
-        crmsds = np.array(crmsd_list)
-        ccs = np.array(cc_list)
+        sdevs = np.round(np.array(sdev_list), 3)
+        crmsds = np.round(np.array(crmsd_list), 3)
+        ccs = np.round(np.array(cc_list), 3)
 
         fig = plt.figure(figsize=(12, 10))
 
@@ -255,7 +268,7 @@ for var, operation in variables_config.items():
             markerObs='o',
             colObs='red',
             titleOBS='Reference',
-            axisMax=float(np.max(sdevs) * 1.2),
+            axisMax=round(float(np.max(sdevs) * 1.2), 3),
             colCOR='black',
             colRMS='RoyalBlue',
             colSTD='SlateGray',
