@@ -42,9 +42,10 @@ NON_CONUS = {
 variables_config = {
     "airTmax": "mean",
     "airTmin": "mean",
-    "precip": "sum"
+    "precip": "mean"
 }
 
+# known "no data" sentinels that show up
 FILL_VALUE = -9999.0
 FILL_ABS_THRESHOLD = 1e10
 
@@ -78,11 +79,12 @@ def load_conus_boundary(shapefile_path=SHAPEFILE_PATH):
 
 
 def mask_fill_values(da):
+    """Replace known no-data sentinels with real NaN."""
     return da.where((da != FILL_VALUE) & (np.abs(da) < FILL_ABS_THRESHOLD))
 
 
 def clip_to_conus(da_or_ds, conus_geom, lat_name=None, lon_name=None, all_touched=True):
-    """Clip an xarray DataArray/Dataset to the CONUS boundary."""
+    # Clip an xarray DataArray/Dataset to the CONUS boundary
     if lat_name is None:
         lat_name = 'lat' if 'lat' in da_or_ds.coords else ('latitude' if 'latitude' in da_or_ds.coords else None)
     if lon_name is None:
@@ -100,6 +102,7 @@ def clip_to_conus(da_or_ds, conus_geom, lat_name=None, lon_name=None, all_touche
     obj = da_or_ds.rio.write_crs("EPSG:4326", inplace=False)
     obj = obj.rio.set_spatial_dims(x_dim=lon_name, y_dim=lat_name, inplace=False)
 
+    # Force the nodata value used for out-of-geometry pixels to be NaN
     if isinstance(obj, xr.Dataset):
         for v in obj.data_vars:
             obj[v] = obj[v].rio.write_nodata(np.nan)
@@ -110,26 +113,29 @@ def clip_to_conus(da_or_ds, conus_geom, lat_name=None, lon_name=None, all_touche
 
 
 def normalize_precip_units(da, label):
-    """Express precipitation as a monthly accumulation (mm/month), matching
-    the convention assumed by aggregate_yearly's annual sum.
-    """
+    # Express precipitation as a daily rate (mm/day), matching the
     units = da.attrs.get('units')
     sample_mean = float(da.isel(time=slice(0, 1)).mean(skipna=True))
     print(f"    [units check] {label}: units='{units}', sample monthly mean={sample_mean:.4f}")
 
     flux_units = {'kg m-2 s-1', 'kg/m2/s', 'kg m^-2 s^-1', 'mm s-1', 'mm/s'}
     per_day_units = {'mm/day', 'mm day-1', 'mm d-1'}
+    per_month_units = {'mm/month', 'mm month-1'}
 
     if units in flux_units:
-        print(f"    [units check] {label}: converting flux -> mm/month")
-        return da * 86400 * da.time.dt.days_in_month
+        print(f"    [units check] {label}: converting flux -> mm/day")
+        return da * 86400
     if units in per_day_units:
-        print(f"    [units check] {label}: converting mm/day -> mm/month")
-        return da * da.time.dt.days_in_month
+        print(f"    [units check] {label}: already mm/day, no conversion needed")
+        return da
+    if units in per_month_units:
+        print(f"    [units check] {label}: converting mm/month -> mm/day")
+        return da / da.time.dt.days_in_month
     return da
 
 
 def get_area_weights(da, lat_name=None):
+    # cos(latitude) area weights, broadcast to da's full shape.
     if lat_name is None:
         lat_name = 'lat' if 'lat' in da.coords else 'latitude'
     w = np.cos(np.deg2rad(da[lat_name]))
@@ -138,6 +144,7 @@ def get_area_weights(da, lat_name=None):
 
 
 def weighted_taylor_stats(t, r, w):
+    # Area-weighted centered pattern statistics
     wsum = np.sum(w)
     tmean = np.sum(w * t) / wsum
     rmean = np.sum(w * r) / wsum
@@ -159,13 +166,17 @@ def weighted_taylor_stats(t, r, w):
     return float(sdev_t), float(sdev_r), pc, crmsd
 
 
-def aggregate_yearly(ds, operation):
-    ds_sliced = ds.sel(time=slice('1980-01-01', '2014-12-31'))
+def aggregate_yearly(da, operation):
+    # Slice to the 1980-2014 period and resample to annual resolution
+    da_sliced = da.sel(time=slice('1980-01-01', '2014-12-31'))
 
     if operation == "mean":
-        return ds_sliced.resample(time='YS').mean(dim='time', skipna=True)
+        def _weighted_annual_mean(group):
+            weights = group.time.dt.days_in_month
+            return group.weighted(weights).mean(dim='time', skipna=True)
+        return da_sliced.resample(time='YS').map(_weighted_annual_mean)
     elif operation == "sum":
-        return ds_sliced.resample(time='YS').sum(dim='time', skipna=True)
+        return da_sliced.resample(time='YS').sum(dim='time', skipna=True)
     else:
         raise ValueError(f"Unknown aggregation operation: {operation}")
 
@@ -186,19 +197,18 @@ for var, operation in variables_config.items():
 
     print(f"Loading Livneh monthly files for [{var}]...")
     with xr.open_mfdataset(livneh_pattern, combine='by_coords', data_vars='all') as livneh_ds:
-        livneh_ds = livneh_ds.copy()
-        # Scrub fill values BEFORE unit conversion / aggregation.
-        livneh_ds[var] = mask_fill_values(livneh_ds[var])
+        livneh_da = livneh_ds[var]
+        # Scrub fill values before agg
+        livneh_da = mask_fill_values(livneh_da)
 
         if var == 'precip':
-            livneh_ds[var] = normalize_precip_units(livneh_ds[var], "Livneh")
+            livneh_da = normalize_precip_units(livneh_da, "Livneh")
 
-        livneh_yearly = aggregate_yearly(livneh_ds, operation)
+        livneh_yearly = aggregate_yearly(livneh_da, operation)
 
         print(f"Clipping Livneh [{var}] to CONUS")
         livneh_yearly = clip_to_conus(livneh_yearly, conus_geom)
-        # pull into memory now so the data survives past the file closing
-        obs_da = livneh_yearly[var].load()
+        obs_da = livneh_yearly.load()
 
     print(f"Yearly Livneh [{var}] dims: {dict(obs_da.sizes)}")
 
@@ -219,7 +229,7 @@ for var, operation in variables_config.items():
     obs_wvar = np.sum(obs_weights_clean * (obs_clean - obs_wmean) ** 2) / obs_wsum
     baseline_sdev = float(np.sqrt(obs_wvar))
 
-    # initialize SkillMetrics tracking lists w/ baseline's perfect score
+    # initialize SkillMetrics tracking lists w/ baseline perfect score
     sdev_list = [baseline_sdev]
     crmsd_list = [0.0]
     cc_list = [1.0]
@@ -236,17 +246,16 @@ for var, operation in variables_config.items():
 
         try:
             with xr.open_mfdataset(model_pattern, combine='by_coords', data_vars='all') as model_ds:
-                model_ds = model_ds.copy()
-                # Scrub fill values BEFORE unit conversion / aggregation.
-                model_ds[var] = mask_fill_values(model_ds[var])
+                model_da_raw = model_ds[var]
+                model_da_raw = mask_fill_values(model_da_raw)
 
                 if var == 'precip':
-                    model_ds[var] = normalize_precip_units(model_ds[var], name)
+                    model_da_raw = normalize_precip_units(model_da_raw, name)
 
-                model_yearly = aggregate_yearly(model_ds, operation)
+                model_yearly = aggregate_yearly(model_da_raw, operation)
                 # clip the model grid to CONUS before regridding
                 model_yearly = clip_to_conus(model_yearly, conus_geom)
-                model_da = model_yearly[var].load()
+                model_da = model_yearly.load()
 
             obs_regrid = obs_da.interp_like(model_da, method='nearest')
 
@@ -326,7 +335,7 @@ for var, operation in variables_config.items():
         plt.title(f'LOCA2 CONUS Yearly Historical Validation (1980-2014): {var}',
                   y=1.08, fontsize=14, fontweight='bold')
         plt.tight_layout()
-        output_plot = os.path.join(OUTPUT_DIR, f"conus_{var}_yearly_nclmethod.png")
+        output_plot = os.path.join(OUTPUT_DIR, f"conus_{var}_yearly_taylor.png")
         plt.savefig(output_plot, dpi=300)
         plt.close()
 
