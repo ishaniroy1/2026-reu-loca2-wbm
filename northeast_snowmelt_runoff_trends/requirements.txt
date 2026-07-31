@@ -1,0 +1,11 @@
+xarray>=2024.1.0
+netCDF4>=1.6
+dask[array]>=2024.1.0
+numpy>=1.24
+pandas>=2.0
+geopandas>=0.14
+xagg>=0.3.2
+pymannkendall>=1.4.3
+rioxarray>=0.15
+shapely>=2.0
+matplotlib>=3.7

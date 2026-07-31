@@ -13,12 +13,21 @@ Northeast US region defined in config.py.
 """
 
 import os
+import sys
 import glob
 from pathlib import Path
 import xarray as xr
 import numpy as np
 import geopandas as gpd
 import rioxarray  # noqa: F401 -- registers the .rio accessor on xarray objects
+import pyproj.datadir
+
+# pyproj can fail to auto-locate its PROJ data directory in some conda/venv
+# setups, which breaks rioxarray's .rio.write_crs()/.rio.clip() calls with
+# opaque CRS errors. Point it at the environment's own copy explicitly.
+_proj_dir = os.path.join(sys.prefix, "share", "proj")
+pyproj.datadir.set_data_dir(_proj_dir)
+os.environ["PROJ_LIB"] = _proj_dir
 
 import config
 
@@ -80,30 +89,43 @@ def clip_to_region(ds, lat_name="lat", lon_name="lon", all_touched=True):
 
 def discover_model_runs(base_dir, scenario=None):
     """
-    Find GCM-run subfolders under a LOCA2-WBM period directory (historical
-    or future), matching config.MODEL_FOLDER_GLOB (default "*_newprcp"),
-    same discovery approach as the Taylor-diagram validation script.
+    Find GCM-run subfolders directly under a LOCA2-WBM period directory
+    (historical or future), matching config.MODEL_FOLDER_GLOB (default
+    "*_newprcp"). All scenarios for a period live flat under the same
+    base_dir -- the period/scenario is embedded in the folder name itself:
+        {GCM}_{period_or_scenario}_{years}_newprcp
+    e.g. "ACCESS-CM2_historical_1980-2014_newprcp",
+         "NorESM2-MM_ssp585_2015-2100_newprcp"
 
-    If `scenario` is given and config.SCENARIO_SUBDIR_TEMPLATE is
-    non-empty, looks under base_dir/<scenario-subdir> instead of base_dir
-    directly -- see the NOTE in config.py about confirming how SSPs map
-    onto the future directory layout before relying on this for futures.
+    If `scenario` is given (e.g. "ssp245"), only folders whose second
+    underscore-separated field matches it are returned; pass None (the
+    historical case, or a future dir with only one run type) to return
+    everything found.
 
-    Returns a dict of {gcm_name: folder_path}, where gcm_name is the
-    folder-name prefix before the first underscore (e.g. "ACCESS-CM2"
-    from "ACCESS-CM2_historical_1980-2014_newprcp").
+    Returns a dict of {gcm_name: folder_path}.
     """
-    search_dir = base_dir
-    if scenario and config.SCENARIO_SUBDIR_TEMPLATE:
-        search_dir = base_dir / config.SCENARIO_SUBDIR_TEMPLATE.format(scenario=scenario)
-
-    folders = sorted(glob.glob(str(search_dir / config.MODEL_FOLDER_GLOB)))
+    folders = sorted(glob.glob(str(Path(base_dir) / config.MODEL_FOLDER_GLOB)))
     if not folders:
         raise FileNotFoundError(
-            f"No GCM-run folders found matching '{config.MODEL_FOLDER_GLOB}' "
-            f"under {search_dir}"
+            f"No GCM-run folders found matching '{config.MODEL_FOLDER_GLOB}' under {base_dir}"
         )
-    return {os.path.basename(f).split("_")[0]: f for f in folders}
+
+    runs = {}
+    for f in folders:
+        parts = os.path.basename(f).split("_")
+        if len(parts) < 2:
+            continue
+        gcm, folder_scenario = parts[0], parts[1]
+        if scenario is not None and folder_scenario != scenario:
+            continue
+        runs[gcm] = f
+
+    if scenario is not None and not runs:
+        raise FileNotFoundError(
+            f"No GCM-run folders found for scenario='{scenario}' under {base_dir}. "
+            f"Folders present: {[os.path.basename(x) for x in folders]}"
+        )
+    return runs
 
 
 def load_wbm_daily(gcm_run_dir, variables=None, start=None, end=None):
