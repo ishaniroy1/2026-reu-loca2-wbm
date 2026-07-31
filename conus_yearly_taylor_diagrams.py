@@ -113,7 +113,7 @@ def clip_to_conus(da_or_ds, conus_geom, lat_name=None, lon_name=None, all_touche
 
 
 def normalize_precip_units(da, label):
-    # Express precipitation as a daily rate (mm/day), matching the
+    # Express precipitation as a daily rate (mm/day)
     units = da.attrs.get('units')
     sample_mean = float(da.isel(time=slice(0, 1)).mean(skipna=True))
     print(f"    [units check] {label}: units='{units}', sample monthly mean={sample_mean:.4f}")
@@ -134,8 +134,33 @@ def normalize_precip_units(da, label):
     return da
 
 
+def normalize_temp_units(da, label):
+    # Express temperature in degrees Celsius (Kelvin is the usual culprit)
+    units = da.attrs.get('units')
+    sample_mean = float(da.isel(time=slice(0, 1)).mean(skipna=True))
+    print(f"    [units check] {label}: units='{units}', sample monthly mean={sample_mean:.4f}")
+
+    kelvin_units = {'K', 'Kelvin', 'kelvin', 'degK', 'deg_K'}
+    celsius_units = {'degC', 'C', 'Celsius', 'celsius', 'deg_C', 'degree_Celsius'}
+    fahrenheit_units = {'degF', 'F', 'Fahrenheit', 'fahrenheit'}
+
+    if units in kelvin_units:
+        print(f"    [units check] {label}: converting Kelvin -> degC")
+        return da - 273.15
+    if units in fahrenheit_units:
+        print(f"    [units check] {label}: converting Fahrenheit -> degC")
+        return (da - 32) * (5.0 / 9.0)
+    if units in celsius_units:
+        print(f"    [units check] {label}: already degC, no conversion needed")
+        return da
+    if sample_mean > 100:
+        print(f"    [units check] {label}: units unlabeled but magnitude suggests Kelvin -> converting to degC")
+        return da - 273.15
+    return da
+
+
 def get_area_weights(da, lat_name=None):
-    # cos(latitude) area weights, broadcast to da's full shape.
+    # cos(latitude) area weights, broadcast to da's full shape
     if lat_name is None:
         lat_name = 'lat' if 'lat' in da.coords else 'latitude'
     w = np.cos(np.deg2rad(da[lat_name]))
@@ -164,6 +189,32 @@ def weighted_taylor_stats(t, r, w):
     crmsd = float(np.sqrt(max(sdev_t ** 2 + sdev_r ** 2 - 2 * sdev_t * sdev_r * pc, 0.0)))
 
     return float(sdev_t), float(sdev_r), pc, crmsd
+
+
+def make_nice_ticks(max_val, n_ticks=5, decimals=3):
+    # Evenly-spaced, cleanly-rounded ticks so STD/RMS gridlines and RMS arc
+    if max_val <= 0:
+        return np.array([0.0])
+    raw_step = max_val / n_ticks
+    magnitude = 10 ** np.floor(np.log10(raw_step))
+    nice_step = np.ceil(raw_step / magnitude) * magnitude
+    ticks = np.round(np.arange(0, nice_step * (n_ticks + 1), nice_step), decimals)
+    return ticks[ticks <= max_val * 1.3]
+
+
+def clean_numeric_text(ax, decimals=3):
+    # Reformat any numeric-looking text artist on the axes (tick labels AND
+    # inline contour/arc labels) to a fixed number of decimals
+    candidates = list(ax.texts) + list(ax.get_xticklabels()) + list(ax.get_yticklabels())
+    for text_obj in candidates:
+        txt = text_obj.get_text().strip()
+        if not txt:
+            continue
+        try:
+            val = float(txt)
+        except ValueError:
+            continue
+        text_obj.set_text(f"{val:.{decimals}f}")
 
 
 def aggregate_yearly(da, operation):
@@ -203,6 +254,8 @@ for var, operation in variables_config.items():
 
         if var == 'precip':
             livneh_da = normalize_precip_units(livneh_da, "Livneh")
+        elif var in ('airTmax', 'airTmin'):
+            livneh_da = normalize_temp_units(livneh_da, "Livneh")
 
         livneh_yearly = aggregate_yearly(livneh_da, operation)
 
@@ -229,8 +282,13 @@ for var, operation in variables_config.items():
     obs_wvar = np.sum(obs_weights_clean * (obs_clean - obs_wmean) ** 2) / obs_wsum
     baseline_sdev = float(np.sqrt(obs_wvar))
 
-    # initialize SkillMetrics tracking lists w/ baseline perfect score
-    sdev_list = [baseline_sdev]
+    if baseline_sdev == 0:
+        print(f"Livneh [{var}] has zero variance after CONUS clip; skipping Taylor diagram.")
+        continue
+
+    # normalized diagram: everything is a ratio to the obs std dev, so the
+    # reference point is exactly 1.0 and all three variables share a scale
+    sdev_list = [1.0]
     crmsd_list = [0.0]
     cc_list = [1.0]
 
@@ -251,6 +309,8 @@ for var, operation in variables_config.items():
 
                 if var == 'precip':
                     model_da_raw = normalize_precip_units(model_da_raw, name)
+                elif var in ('airTmax', 'airTmin'):
+                    model_da_raw = normalize_temp_units(model_da_raw, name)
 
                 model_yearly = aggregate_yearly(model_da_raw, operation)
                 # clip the model grid to CONUS before regridding
@@ -285,15 +345,19 @@ for var, operation in variables_config.items():
             # (NCL taylor_stats.ncl equivalent)
             sdev, o_std, corr, crmsd = weighted_taylor_stats(m_clean, o_clean, w_clean)
 
-            sdev_list.append(round(sdev, 3))
-            crmsd_list.append(round(crmsd, 3))
+            # normalize to the obs std dev
+            sdev_norm = sdev / baseline_sdev
+            crmsd_norm = crmsd / baseline_sdev
+
+            sdev_list.append(round(sdev_norm, 3))
+            crmsd_list.append(round(crmsd_norm, 3))
             cc_list.append(round(corr, 3))
             active_models.append(name)
 
-            print(f"  Model: {name:<15} | Corr: {corr:.3f} | CRMSE: {crmsd:.3f}")
+            print(f"  Model: {name:<15} | Corr: {corr:.3f} | CRMSE(norm): {crmsd_norm:.3f} | SDEV(norm): {sdev_norm:.3f}")
 
-            if crmsd < lowest_error:
-                lowest_error = crmsd
+            if crmsd_norm < lowest_error:
+                lowest_error = crmsd_norm
                 best_model = name
 
         except Exception as e:
@@ -306,6 +370,10 @@ for var, operation in variables_config.items():
         crmsds = np.array(crmsd_list)
         ccs = np.array(cc_list)
 
+        axis_max = float(np.round(np.max(sdevs) * 1.2, 3))
+        std_ticks = make_nice_ticks(axis_max, n_ticks=5, decimals=3)
+        rms_ticks = make_nice_ticks(axis_max, n_ticks=5, decimals=3)
+
         fig = plt.figure(figsize=(12, 10))
 
         markers_dict = {m: MODEL_STYLE[m] for m in active_models}
@@ -316,7 +384,9 @@ for var, operation in variables_config.items():
             markerObs='o',
             colObs='red',
             titleOBS='Reference',
-            axisMax=float(np.max(sdevs) * 1.2),
+            axisMax=axis_max,
+            tickSTD=std_ticks,
+            tickRMS=rms_ticks,
             colCOR='black',
             colRMS='RoyalBlue',
             colSTD='SlateGray',
@@ -324,6 +394,8 @@ for var, operation in variables_config.items():
             styleSTD='--')
 
         ax = plt.gca()
+        clean_numeric_text(ax, decimals=3)
+
         leg = ax.get_legend()
         handles = leg.legend_handles
         labels = [t.get_text() for t in leg.get_texts()]
@@ -332,7 +404,7 @@ for var, operation in variables_config.items():
         ax.legend(handles, labels, loc='upper right', fontsize=7,
                   ncol=2, framealpha=0.9, title='Models', title_fontsize=8)
 
-        plt.title(f'LOCA2 CONUS Yearly Historical Validation (1980-2014): {var}',
+        plt.title(f'LOCA2 CONUS Yearly Historical Validation (1980-2014): {var} (Normalized)',
                   y=1.08, fontsize=14, fontweight='bold')
         plt.tight_layout()
         output_plot = os.path.join(OUTPUT_DIR, f"conus_{var}_yearly_taylor.png")
