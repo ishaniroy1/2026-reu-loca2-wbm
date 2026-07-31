@@ -42,9 +42,10 @@ NON_CONUS = {
 variables_config = {
     "airTmax": "mean",
     "airTmin": "mean",
-    "precip": "sum"
+    "precip": "mean"
 }
 
+# known "no data" sentinels that show up
 FILL_VALUE = -9999.0
 FILL_ABS_THRESHOLD = 1e10
 
@@ -83,7 +84,7 @@ def mask_fill_values(da):
 
 
 def clip_to_conus(da_or_ds, conus_geom, lat_name=None, lon_name=None, all_touched=True):
-    """Clip an xarray DataArray/Dataset to the CONUS boundary."""
+    # Clip an xarray DataArray/Dataset to the CONUS boundary
     if lat_name is None:
         lat_name = 'lat' if 'lat' in da_or_ds.coords else ('latitude' if 'latitude' in da_or_ds.coords else None)
     if lon_name is None:
@@ -101,6 +102,7 @@ def clip_to_conus(da_or_ds, conus_geom, lat_name=None, lon_name=None, all_touche
     obj = da_or_ds.rio.write_crs("EPSG:4326", inplace=False)
     obj = obj.rio.set_spatial_dims(x_dim=lon_name, y_dim=lat_name, inplace=False)
 
+    # Force the nodata value used for out-of-geometry pixels to be NaN
     if isinstance(obj, xr.Dataset):
         for v in obj.data_vars:
             obj[v] = obj[v].rio.write_nodata(np.nan)
@@ -111,29 +113,70 @@ def clip_to_conus(da_or_ds, conus_geom, lat_name=None, lon_name=None, all_touche
 
 
 def normalize_precip_units(da, label):
+    # Express precipitation as a daily rate (mm/day), matching the
     units = da.attrs.get('units')
     sample_mean = float(da.isel(time=slice(0, 1)).mean(skipna=True))
     print(f"    [units check] {label}: units='{units}', sample monthly mean={sample_mean:.4f}")
 
     flux_units = {'kg m-2 s-1', 'kg/m2/s', 'kg m^-2 s^-1', 'mm s-1', 'mm/s'}
     per_day_units = {'mm/day', 'mm day-1', 'mm d-1'}
+    per_month_units = {'mm/month', 'mm month-1'}
 
     if units in flux_units:
-        print(f"    [units check] {label}: converting flux -> mm/month")
-        return da * 86400 * da.time.dt.days_in_month
+        print(f"    [units check] {label}: converting flux -> mm/day")
+        return da * 86400
     if units in per_day_units:
-        print(f"    [units check] {label}: converting mm/day -> mm/month")
-        return da * da.time.dt.days_in_month
+        print(f"    [units check] {label}: already mm/day, no conversion needed")
+        return da
+    if units in per_month_units:
+        print(f"    [units check] {label}: converting mm/month -> mm/day")
+        return da / da.time.dt.days_in_month
     return da
 
 
-def aggregate_yearly(ds, operation):
-    ds_sliced = ds.sel(time=slice('1980-01-01', '2014-12-31'))
+def get_area_weights(da, lat_name=None):
+    # cos(latitude) area weights, broadcast to da's full shape.
+    if lat_name is None:
+        lat_name = 'lat' if 'lat' in da.coords else 'latitude'
+    w = np.cos(np.deg2rad(da[lat_name]))
+    w_full, _ = xr.broadcast(w, da)
+    return w_full
+
+
+def weighted_taylor_stats(t, r, w):
+    # Area-weighted centered pattern statistics
+    wsum = np.sum(w)
+    tmean = np.sum(w * t) / wsum
+    rmean = np.sum(w * r) / wsum
+
+    tdiff = t - tmean
+    rdiff = r - rmean
+
+    tvar = np.sum(w * tdiff ** 2) / wsum
+    rvar = np.sum(w * rdiff ** 2) / wsum
+
+    sdev_t = np.sqrt(tvar)
+    sdev_r = np.sqrt(rvar)
+
+    denom = np.sqrt(np.sum(w * tdiff ** 2) * np.sum(w * rdiff ** 2))
+    pc = float(np.sum(w * tdiff * rdiff) / denom) if denom > 0 else np.nan
+
+    crmsd = float(np.sqrt(max(sdev_t ** 2 + sdev_r ** 2 - 2 * sdev_t * sdev_r * pc, 0.0)))
+
+    return float(sdev_t), float(sdev_r), pc, crmsd
+
+
+def aggregate_yearly(da, operation):
+    # Slice to the 1980-2014 period and resample to annual resolution
+    da_sliced = da.sel(time=slice('1980-01-01', '2014-12-31'))
 
     if operation == "mean":
-        return ds_sliced.resample(time='YS').mean(dim='time', skipna=True)
+        def _weighted_annual_mean(group):
+            weights = group.time.dt.days_in_month
+            return group.weighted(weights).mean(dim='time', skipna=True)
+        return da_sliced.resample(time='YS').map(_weighted_annual_mean)
     elif operation == "sum":
-        return ds_sliced.resample(time='YS').sum(dim='time', skipna=True)
+        return da_sliced.resample(time='YS').sum(dim='time', skipna=True)
     else:
         raise ValueError(f"Unknown aggregation operation: {operation}")
 
@@ -154,32 +197,40 @@ for var, operation in variables_config.items():
 
     print(f"Loading Livneh monthly files for [{var}]...")
     with xr.open_mfdataset(livneh_pattern, combine='by_coords', data_vars='all') as livneh_ds:
-        livneh_ds = livneh_ds.copy()
-        # Scrub fill values BEFORE unit conversion / aggregation.
-        livneh_ds[var] = mask_fill_values(livneh_ds[var])
+        livneh_da = livneh_ds[var]
+        # Scrub fill values before agg
+        livneh_da = mask_fill_values(livneh_da)
 
         if var == 'precip':
-            livneh_ds[var] = normalize_precip_units(livneh_ds[var], "Livneh")
+            livneh_da = normalize_precip_units(livneh_da, "Livneh")
 
-        livneh_yearly = aggregate_yearly(livneh_ds, operation)
+        livneh_yearly = aggregate_yearly(livneh_da, operation)
 
         print(f"Clipping Livneh [{var}] to CONUS")
         livneh_yearly = clip_to_conus(livneh_yearly, conus_geom)
-        # pull into memory now so the data survives past the file closing
-        obs_da = livneh_yearly[var].load()
+        obs_da = livneh_yearly.load()
 
     print(f"Yearly Livneh [{var}] dims: {dict(obs_da.sizes)}")
 
     raw_obs_data = obs_da.values.flatten()
+    obs_weights_full = get_area_weights(obs_da)
+    raw_obs_weights = obs_weights_full.values.flatten()
     obs_mask = ~np.isnan(raw_obs_data)
     obs_clean = raw_obs_data[obs_mask]
+    obs_weights_clean = raw_obs_weights[obs_mask]
 
     if obs_clean.size == 0:
         print(f"No valid Livneh data for {var} after CONUS clip; skipping Taylor diagram.")
         continue
 
-    # initialize SkillMetrics tracking lists w/ baseline's perfect score
-    sdev_list = [round(float(np.std(obs_clean)), 3)]
+    # area-weighted baseline standard deviation (obs on its own native grid)
+    obs_wsum = np.sum(obs_weights_clean)
+    obs_wmean = np.sum(obs_weights_clean * obs_clean) / obs_wsum
+    obs_wvar = np.sum(obs_weights_clean * (obs_clean - obs_wmean) ** 2) / obs_wsum
+    baseline_sdev = float(np.sqrt(obs_wvar))
+
+    # initialize SkillMetrics tracking lists w/ baseline perfect score
+    sdev_list = [baseline_sdev]
     crmsd_list = [0.0]
     cc_list = [1.0]
 
@@ -195,27 +246,30 @@ for var, operation in variables_config.items():
 
         try:
             with xr.open_mfdataset(model_pattern, combine='by_coords', data_vars='all') as model_ds:
-                model_ds = model_ds.copy()
-                # Scrub fill values BEFORE unit conversion / aggregation.
-                model_ds[var] = mask_fill_values(model_ds[var])
+                model_da_raw = model_ds[var]
+                model_da_raw = mask_fill_values(model_da_raw)
 
                 if var == 'precip':
-                    model_ds[var] = normalize_precip_units(model_ds[var], name)
+                    model_da_raw = normalize_precip_units(model_da_raw, name)
 
-                model_yearly = aggregate_yearly(model_ds, operation)
+                model_yearly = aggregate_yearly(model_da_raw, operation)
                 # clip the model grid to CONUS before regridding
                 model_yearly = clip_to_conus(model_yearly, conus_geom)
-                model_da = model_yearly[var].load()
+                model_da = model_yearly.load()
 
             obs_regrid = obs_da.interp_like(model_da, method='nearest')
 
+            model_weights_full = get_area_weights(model_da)
+
             model_data = model_da.values.flatten()
             obs_regrid_data = obs_regrid.values.flatten()
+            weights_flat = model_weights_full.values.flatten()
 
             valid_mask = ~np.isnan(model_data) & ~np.isnan(obs_regrid_data)
 
             m_clean = model_data[valid_mask]
             o_clean = obs_regrid_data[valid_mask]
+            w_clean = weights_flat[valid_mask]
 
             # size/dimension checking
             total_cells = len(model_data)
@@ -227,15 +281,9 @@ for var, operation in variables_config.items():
                 print(f"  Skipping {name} [{var}]: no overlapping valid data")
                 continue
 
-            # numpy math
-            sdev = float(np.std(m_clean))
-            o_std = float(np.std(o_clean))
-
-            # extract correlation scalar
-            corr = float(np.corrcoef(m_clean, o_clean)[0, 1])
-
-            # standard CRMSD formula
-            crmsd = float(np.sqrt(sdev**2 + o_std**2 - 2 * sdev * o_std * corr))
+            # area-weighted std devs, pattern correlation, and CRMSD
+            # (NCL taylor_stats.ncl equivalent)
+            sdev, o_std, corr, crmsd = weighted_taylor_stats(m_clean, o_clean, w_clean)
 
             sdev_list.append(round(sdev, 3))
             crmsd_list.append(round(crmsd, 3))
@@ -254,9 +302,9 @@ for var, operation in variables_config.items():
 
     # generating taylor diagrams
     if active_models:
-        sdevs = np.round(np.array(sdev_list), 3)
-        crmsds = np.round(np.array(crmsd_list), 3)
-        ccs = np.round(np.array(cc_list), 3)
+        sdevs = np.array(sdev_list)
+        crmsds = np.array(crmsd_list)
+        ccs = np.array(cc_list)
 
         fig = plt.figure(figsize=(12, 10))
 
@@ -268,7 +316,7 @@ for var, operation in variables_config.items():
             markerObs='o',
             colObs='red',
             titleOBS='Reference',
-            axisMax=round(float(np.max(sdevs) * 1.2), 3),
+            axisMax=float(np.max(sdevs) * 1.2),
             colCOR='black',
             colRMS='RoyalBlue',
             colSTD='SlateGray',
