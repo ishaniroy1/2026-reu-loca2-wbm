@@ -274,6 +274,8 @@ def plot_bias_grid(var, model_bias, state_borders):
                               constrained_layout=True)
     axes = np.atleast_1d(axes).flatten()
 
+    bias_label = 'Precip (%)' if var == 'precip' else VAR_LABELS[var]
+
     mesh = None
     for ax, (label, da) in zip(axes, panels):
         # RdBu_r: low (negative, cooler/drier) -> blue, high (positive,
@@ -290,14 +292,14 @@ def plot_bias_grid(var, model_bias, state_borders):
         ax.axis('off')
 
     cbar = fig.colorbar(mesh, ax=axes[:n].tolist(), shrink=0.75,
-                         label=f'Bias ({VAR_LABELS[var]})')
+                         label=f'Bias ({bias_label})')
     cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
     cbar.ax.tick_params(labelsize=8)
 
     warm_word = "wetter" if var == "precip" else "warmer"
     cool_word = "drier" if var == "precip" else "cooler"
     fig.suptitle(
-        f'CONUS Annual Bias, Model \u2212 Obs (1980-2014): {VAR_LABELS[var]}\n'
+        f'CONUS Annual Bias, Model \u2212 Obs (1980-2014): {bias_label}\n'
         f'Red = {warm_word}, Blue = {cool_word}, White = 0',
         fontsize=13, fontweight='bold')
 
@@ -336,7 +338,10 @@ for var, operation in variables_config.items():
             model_clims[name] = m_clim
 
             obs_regrid = obs_clim.interp_like(m_clim, method='nearest')
-            model_bias[name] = m_clim - obs_regrid
+            if var == 'precip':
+                model_bias[name] = (m_clim - obs_regrid) / obs_regrid * 100
+            else:
+                model_bias[name] = m_clim - obs_regrid
 
         except Exception as e:
             print(f"  Skipping model {name} [{var}] due to calculation mismatch: {e}")

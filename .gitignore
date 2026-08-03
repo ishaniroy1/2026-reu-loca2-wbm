@@ -13,3 +13,6 @@ Miniconda3-latest-Linux-x86_64.sh
 
 # HUC8 data
 data/WBD/
+
+# CDO cache
+northeast_snowmelt_runoff_trends/cdo_cache/
