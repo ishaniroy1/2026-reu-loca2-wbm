@@ -16,3 +16,6 @@ data/WBD/
 
 # CDO cache
 northeast_snowmelt_runoff_trends/cdo_cache/
+
+# full run log
+northeast_snowmelt_runoff_trends/full_run.log
