@@ -5250,3 +5250,8 @@ nohup: ignoring input
 2026-08-03 11:04:56,016 INFO     [cache hit] ACCESS-CM2_historical_1980-2014_newprcp__snowFall__wateryear_sum.nc
 2026-08-03 11:04:56,118 INFO     [cache hit] ACCESS-CM2_historical_1980-2014_newprcp__precip-snowFall__merged.nc
 2026-08-03 11:04:56,253 INFO     [cache hit] ACCESS-CM2_historical_1980-2014_newprcp__precip__wateryear_sum.nc
+2026-08-04 02:04:31,810 INFO Processing LOCA2-WBM historical output for ACCESS-ESM1-5 ...
+2026-08-04 02:04:34,869 INFO     [cache hit] ACCESS-ESM1-5_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-04 02:04:35,021 INFO     [cache hit] ACCESS-ESM1-5_historical_1980-2014_newprcp__snowFall__wateryear_sum.nc
+2026-08-04 02:04:35,250 INFO     [cache hit] ACCESS-ESM1-5_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-04 02:04:35,358 INFO     [cache hit] ACCESS-ESM1-5_historical_1980-2014_newprcp__precip__wateryear_sum.nc

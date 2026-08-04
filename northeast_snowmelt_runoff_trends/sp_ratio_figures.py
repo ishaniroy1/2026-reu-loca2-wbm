@@ -32,8 +32,7 @@ import climatology
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
-WINDOW = "water_year"  # switch to "cold_season" if you want the Oct-Apr version instead
-
+WINDOW = "cold_season"
 
 def _load_ne_state_outlines():
     """Individual (non-dissolved) Northeast state boundaries, for drawing
