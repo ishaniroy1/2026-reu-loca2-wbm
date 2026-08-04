@@ -34,6 +34,7 @@ log = logging.getLogger(__name__)
 
 WINDOW = "cold_season"
 
+
 def _load_ne_state_outlines():
     """Individual (non-dissolved) Northeast state boundaries, for drawing
     state outlines on top of the S/P ratio maps."""
@@ -82,63 +83,53 @@ def build_historical_figure(ne_borders):
     log.info(f"  Saved {out_path}")
 
 
-def build_future_grid_figure(ne_borders):
-    log.info("Building future S/P ratio grid figure (mid/late-century x SSP)...")
-
-    periods = [("mid_century", "Mid-century\n(2040-2070)"),
-               ("late_century", "Late-century\n(2070-2100)")]
+def build_future_period_figure(period_name, period_label, ne_borders):
+    """One figure per future period (mid-century or late-century), one row
+    of panels -- one per SSP scenario -- with its OWN color scale/legend,
+    independent of the other period's figure."""
+    log.info(f"Building future S/P ratio figure: {period_name} ...")
     scenarios = config.SCENARIOS  # ["ssp245", "ssp370", "ssp585"]
 
-    # compute every panel first so the color scale can be shared and
-    # consistent across all six, and so a slow step doesn't happen mid-plot
     panels = {}
-    for period_name, _ in periods:
-        for scenario in scenarios:
-            log.info(f"  {period_name} / {scenario} ...")
-            gcm_runs = io_utils.discover_model_runs(config.LOCA2WBM_FUT_DIR, scenario=scenario)
-            if not gcm_runs:
-                log.warning(f"    No model runs found for {scenario}; leaving panel blank")
-                panels[(period_name, scenario)] = None
-                continue
-            per_model, ensemble = climatology.multi_model_climatology(
-                gcm_runs, config.CLIMATOLOGY_PERIODS[period_name], window=WINDOW
-            )
-            panels[(period_name, scenario)] = (ensemble["sp_ratio_clim"], len(per_model))
+    for scenario in scenarios:
+        log.info(f"  {period_name} / {scenario} ...")
+        gcm_runs = io_utils.discover_model_runs(config.LOCA2WBM_FUT_DIR, scenario=scenario)
+        if not gcm_runs:
+            log.warning(f"    No model runs found for {scenario}; leaving panel blank")
+            panels[scenario] = None
+            continue
+        per_model, ensemble = climatology.multi_model_climatology(
+            gcm_runs, config.CLIMATOLOGY_PERIODS[period_name], window=WINDOW
+        )
+        panels[scenario] = (ensemble["sp_ratio_clim"], len(per_model))
 
-    fig, axes = plt.subplots(len(periods), len(scenarios),
-                              figsize=(5.5 * len(scenarios), 5 * len(periods)),
+    fig, axes = plt.subplots(1, len(scenarios), figsize=(5.5 * len(scenarios), 5),
                               constrained_layout=True)
-    axes = np.atleast_2d(axes)
+    axes = np.atleast_1d(axes)
 
     mesh = None
-    for row, (period_name, period_label) in enumerate(periods):
-        for col, scenario in enumerate(scenarios):
-            ax = axes[row, col]
-            entry = panels[(period_name, scenario)]
-            scen_label = config.SCENARIO_LABELS.get(scenario, scenario)
+    for col, scenario in enumerate(scenarios):
+        ax = axes[col]
+        entry = panels[scenario]
+        scen_label = config.SCENARIO_LABELS.get(scenario, scenario)
 
-            if entry is None:
-                ax.axis("off")
-                ax.set_title(f"{scen_label}\n(no data)", fontsize=11)
-                continue
+        if entry is None:
+            ax.axis("off")
+            ax.set_title(f"{scen_label}\n(no data)", fontsize=11)
+            continue
 
-            da, n_models = entry
-            title = f"{scen_label}" if row == 0 else ""
-            mesh = _draw_sp_ratio(ax, da, ne_borders, title=title)
-
-            if col == 0:
-                ax.set_ylabel(period_label, fontsize=11, fontweight="bold")
-                ax.yaxis.set_label_coords(-0.08, 0.5)
+        da, n_models = entry
+        mesh = _draw_sp_ratio(ax, da, ne_borders, title=scen_label)
 
     fig.suptitle(
-        f"Northeast US Snow-to-Precipitation Ratio \u2014 Future Projections\n"
-        f"({WINDOW.replace('_', ' ')}, ensemble mean per scenario/period)",
+        f"Northeast US Snow-to-Precipitation Ratio \u2014 {period_label}\n"
+        f"({WINDOW.replace('_', ' ')}, ensemble mean per scenario)",
         fontsize=14, fontweight="bold")
 
     if mesh is not None:
-        fig.colorbar(mesh, ax=axes.ravel().tolist(), shrink=0.7, label="S/P ratio")
+        fig.colorbar(mesh, ax=axes.tolist(), shrink=0.8, label="S/P ratio")
 
-    out_path = config.PLOTS_DIR / f"sp_ratio_future_grid_{WINDOW}.png"
+    out_path = config.PLOTS_DIR / f"sp_ratio_{period_name}_{WINDOW}.png"
     fig.savefig(out_path, dpi=200)
     plt.close(fig)
     log.info(f"Saved {out_path}")
@@ -147,7 +138,8 @@ def build_future_grid_figure(ne_borders):
 def main():
     ne_borders = _load_ne_state_outlines()
     build_historical_figure(ne_borders)
-    build_future_grid_figure(ne_borders)
+    build_future_period_figure("mid_century", "Mid-Century (2040-2070)", ne_borders)
+    build_future_period_figure("late_century", "Late-Century (2070-2100)", ne_borders)
     log.info(f"Done. Figures written to {config.PLOTS_DIR}")
 
 
