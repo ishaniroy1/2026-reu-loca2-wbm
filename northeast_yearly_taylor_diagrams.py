@@ -224,8 +224,52 @@ def aggregate_yearly(da, operation):
         raise ValueError(f"Unknown aggregation operation: {operation}")
 
 
+def draw_taylor_panel(sdevs, crmsds, ccs, active_models, axis_max, std_ticks, rms_ticks,
+                       title, legend_fontsize=7, legend_ncol=2):
+    """Draw one Taylor diagram into whatever the CURRENT matplotlib axes
+    are (skill_metrics.taylor_diagram operates on plt.gca() rather than
+    taking an ax argument) -- call plt.subplot(...) immediately before
+    this to place it in a specific panel. Shared by both the individual
+    per-variable figures and the combined all-variables figure so the two
+    stay visually consistent."""
+    markers_dict = {m: MODEL_STYLE[m] for m in active_models}
+
+    sm.taylor_diagram(sdevs, crmsds, ccs,
+        markerLegend='on',
+        markers=markers_dict,
+        markerObs='o',
+        colObs='red',
+        titleOBS='Reference',
+        axisMax=axis_max,
+        tickSTD=std_ticks,
+        tickRMS=rms_ticks,
+        colCOR='black',
+        colRMS='RoyalBlue',
+        colSTD='SlateGray',
+        styleRMS=':',
+        styleSTD='--')
+
+    ax = plt.gca()
+    clean_numeric_text(ax, decimals=3)
+
+    leg = ax.get_legend()
+    handles = leg.legend_handles
+    labels = [t.get_text() for t in leg.get_texts()]
+    leg.remove()
+    ax.legend(handles, labels, loc='upper right', fontsize=legend_fontsize,
+              ncol=legend_ncol, framealpha=0.9, title='Models', title_fontsize=legend_fontsize + 1)
+
+    ax.set_title(title, fontsize=12, fontweight='bold', pad=20)
+    return ax
+
+
 print(f"Loading Northeast boundary from {SHAPEFILE_PATH}")
 northeast_geom = load_northeast_boundary()
+
+# stashes each variable's finished Taylor-diagram inputs so the combined
+# all-variables figure (built after this loop) can reuse them without
+# redoing any of the data loading/statistics work
+all_var_results = {}
 
 for var, operation in variables_config.items():
     print(f"\n--- Processing variable: {var} (yearly {operation}) ---")
@@ -366,35 +410,17 @@ for var, operation in variables_config.items():
         std_ticks = make_nice_ticks(axis_max, n_ticks=5, decimals=3)
         rms_ticks = make_nice_ticks(axis_max, n_ticks=5, decimals=3)
 
+        # stash everything the combined all-variables figure needs, so it
+        # can redraw this exact panel later without recomputing anything
+        all_var_results[var] = dict(
+            sdevs=sdevs, crmsds=crmsds, ccs=ccs, active_models=list(active_models),
+            axis_max=axis_max, std_ticks=std_ticks, rms_ticks=rms_ticks,
+            best_model=best_model,
+        )
+
         fig = plt.figure(figsize=(12, 10))
-
-        markers_dict = {m: MODEL_STYLE[m] for m in active_models}
-
-        sm.taylor_diagram(sdevs, crmsds, ccs,
-            markerLegend='on',
-            markers=markers_dict,
-            markerObs='o',
-            colObs='red',
-            titleOBS='Reference',
-            axisMax=axis_max,
-            tickSTD=std_ticks,
-            tickRMS=rms_ticks,
-            colCOR='black',
-            colRMS='RoyalBlue',
-            colSTD='SlateGray',
-            styleRMS=':',
-            styleSTD='--')
-
-        ax = plt.gca()
-        clean_numeric_text(ax, decimals=3)
-
-        leg = ax.get_legend()
-        handles = leg.legend_handles
-        labels = [t.get_text() for t in leg.get_texts()]
-        leg.remove()
-        fig.subplots_adjust(right=0.9)
-        ax.legend(handles, labels, loc='upper right', fontsize=7,
-                  ncol=2, framealpha=0.9, title='Models', title_fontsize=8)
+        draw_taylor_panel(sdevs, crmsds, ccs, active_models, axis_max, std_ticks, rms_ticks,
+                           title='', legend_fontsize=7, legend_ncol=2)
 
         plt.title(f'LOCA2 Northeast Yearly Historical Validation (1980-2014): {var} (Normalized)',
                   y=1.08, fontsize=14, fontweight='bold')
@@ -407,3 +433,28 @@ for var, operation in variables_config.items():
         print(f"{best_model} runs closest to observed data")
     else:
         print(f"No models produced valid results for {var}; skipping Taylor diagram.")
+
+if all_var_results:
+    combined_vars = [v for v in variables_config if v in all_var_results]
+    n_panels = len(combined_vars)
+
+    fig = plt.figure(figsize=(7 * n_panels, 8))
+
+    for i, var in enumerate(combined_vars):
+        res = all_var_results[var]
+        plt.subplot(1, n_panels, i + 1)
+        draw_taylor_panel(
+            res['sdevs'], res['crmsds'], res['ccs'], res['active_models'],
+            res['axis_max'], res['std_ticks'], res['rms_ticks'],
+            title=f'{var} (Normalized)', legend_fontsize=5, legend_ncol=2,
+        )
+
+    fig.suptitle('LOCA2 Northeast Yearly Historical Validation (1980-2014): All Variables',
+                 y=1.02, fontsize=16, fontweight='bold')
+    plt.tight_layout()
+    output_plot = os.path.join(OUTPUT_DIR, "northeast_all_variables_yearly_taylor.png")
+    plt.savefig(output_plot, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"\nCombined all-variables plot saved to {output_plot}")
+else:
+    print("\nNo variables produced valid results; skipping combined all-variables Taylor diagram.")
