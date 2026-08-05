@@ -50,11 +50,28 @@ variables_config = {
 VAR_LABELS = {
     "airTmax": "Tmax (\u00b0C)",
     "airTmin": "Tmin (\u00b0C)",
-    "precip": "Precip (mm/day)",
+    "precip": "Precip (%)",
 }
 
 FILL_VALUE = -9999.0
 FILL_ABS_THRESHOLD = 1e10
+
+# Fixed bias-map color scale AND hardcoded mask threshold (values beyond
+# this are set to NaN rather than shown), applied per variable. airTmax/
+# airTmin are unchanged (degC, +/-4). precip is now expressed as PERCENT
+# bias rather than mm/day (see the percent-conversion step in the main
+# loop below), so its limit is in percent, not mm/day -- adjust if you
+# want a tighter/looser cutoff than +/-100%.
+BIAS_SCALE_LIMIT = {
+    "airTmax": 4.0,
+    "airTmin": 4.0,
+    "precip": 100.0,
+}
+
+# precip cells with a historical (obs) climatology below this are excluded
+# from the percent-bias calculation -- dividing by a near-zero denominator
+# is what produces wild, physically meaningless percentages
+MIN_OBS_PRECIP_FOR_PCT = 0.1  # mm/day
 
 # ---------------------------------------------------------------------------
 # Ensemble weights (e.g. climate-sensitivity-informed weighting -- models
@@ -244,16 +261,29 @@ def compute_weighted_ensemble(data_dict, weights, label=""):
     return stacked.weighted(wgt_da).mean(dim="model", skipna=True)
 
 
+def mask_beyond_limit(bias_da, limit, label=""):
+    """Set any cell with |bias| > limit to NaN (hardcoded out, per the
+    fixed +/-limit color scale used for these plots)."""
+    n_before = int((~np.isnan(bias_da)).sum())
+    masked = bias_da.where(np.abs(bias_da) <= limit)
+    n_after = int((~np.isnan(masked)).sum())
+    if n_after < n_before:
+        tag = f" [{label}]" if label else ""
+        print(f"    [mask{tag}] excluded {n_before - n_after} cell(s) with |bias| > {limit}")
+    return masked
+
+
 def plot_bias_map(var, bias_da, region_label, state_borders, out_name):
-    """Single-panel diverging bias map (model ensemble - obs), its own
-    color scale sized to this map's own data (not shared with other maps),
-    so regional detail isn't washed out by a CONUS-wide range."""
+    """Single-panel diverging bias map (model ensemble - obs), using the
+    fixed +/-BIAS_SCALE_LIMIT[var] color scale (not auto-computed from
+    this map's own data), so every plot for a given variable is directly
+    comparable regardless of run-to-run outlier count."""
     vals = bias_da.values
     vals = vals[~np.isnan(vals)]
     if vals.size == 0:
         print(f"No valid data for {var} ({region_label}); skipping.")
         return
-    abs_max = float(np.nanpercentile(np.abs(vals), 98)) or float(np.nanmax(np.abs(vals))) or 1.0
+    abs_max = BIAS_SCALE_LIMIT[var]
     vmin, vmax = -abs_max, abs_max
 
     fig, ax = plt.subplots(figsize=(7, 6), constrained_layout=True)
@@ -284,7 +314,7 @@ def plot_bias_map(var, bias_da, region_label, state_borders, out_name):
 
 def plot_combined_bias_map(region_label, bias_dict, state_borders, out_name):
     """One figure, one panel per variable (airTmax, airTmin, precip), each
-    with its own color scale since the variables are on different units."""
+    using its own fixed +/-BIAS_SCALE_LIMIT[var] color scale."""
     var_order = [v for v in variables_config if v in bias_dict]
     fig, axes = plt.subplots(1, len(var_order), figsize=(6 * len(var_order), 6),
                               constrained_layout=True)
@@ -297,7 +327,7 @@ def plot_combined_bias_map(region_label, bias_dict, state_borders, out_name):
         if vals.size == 0:
             ax.axis('off')
             continue
-        abs_max = float(np.nanpercentile(np.abs(vals), 98)) or float(np.nanmax(np.abs(vals))) or 1.0
+        abs_max = BIAS_SCALE_LIMIT[var]
         vmin, vmax = -abs_max, abs_max
 
         mesh = ax.pcolormesh(da['lon'], da['lat'], da.values, cmap='RdBu_r',
@@ -369,6 +399,18 @@ for var, operation in variables_config.items():
 
     print(f"  Building weighted ensemble ({len(model_bias_common)} models)...")
     ensemble_bias_conus = compute_weighted_ensemble(model_bias_common, MODEL_WEIGHTS, label=var)
+
+    if var == 'precip':
+        # convert absolute bias (mm/day) to percent bias relative to obs;
+        # mathematically identical to averaging per-model percent biases
+        # first, since obs is the same fixed denominator for every model
+        # at a given cell (the weighted mean above is linear). Cells where
+        # obs is too close to zero are masked rather than left to blow up
+        # to a meaningless percentage.
+        safe_obs = obs_clim.where(obs_clim >= MIN_OBS_PRECIP_FOR_PCT)
+        ensemble_bias_conus = (ensemble_bias_conus / safe_obs) * 100
+
+    ensemble_bias_conus = mask_beyond_limit(ensemble_bias_conus, BIAS_SCALE_LIMIT[var], label=var)
 
     plot_bias_map(var, ensemble_bias_conus, "CONUS", conus_borders,
                   f"conus_{var}_bias_ensemble_weighted.png")
