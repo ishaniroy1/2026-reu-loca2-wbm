@@ -421,12 +421,13 @@ for var, operation in variables_config.items():
         fig = plt.figure(figsize=(12, 10))
         draw_taylor_panel(sdevs, crmsds, ccs, active_models, axis_max, std_ticks, rms_ticks,
                            title='', legend_fontsize=7, legend_ncol=2)
+        fig.subplots_adjust(right=0.9)
 
         plt.title(f'LOCA2 Northeast Yearly Historical Validation (1980-2014): {var} (Normalized)',
                   y=1.08, fontsize=14, fontweight='bold')
         plt.tight_layout()
         output_plot = os.path.join(OUTPUT_DIR, f"northeast_{var}_yearly_taylor.png")
-        plt.savefig(output_plot, dpi=300)
+        plt.savefig(output_plot, dpi=300, bbox_inches='tight')
         plt.close()
 
         print(f"Plot saved to {output_plot}")
