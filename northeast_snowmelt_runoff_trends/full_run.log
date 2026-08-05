@@ -5255,3 +5255,13 @@ nohup: ignoring input
 2026-08-04 02:04:35,021 INFO     [cache hit] ACCESS-ESM1-5_historical_1980-2014_newprcp__snowFall__wateryear_sum.nc
 2026-08-04 02:04:35,250 INFO     [cache hit] ACCESS-ESM1-5_historical_1980-2014_newprcp__precip-snowFall__merged.nc
 2026-08-04 02:04:35,358 INFO     [cache hit] ACCESS-ESM1-5_historical_1980-2014_newprcp__precip__wateryear_sum.nc
+2026-08-04 16:27:54,830 INFO Processing LOCA2-WBM historical output for BCC-CSM2-MR ...
+2026-08-04 16:27:55,453 INFO     [cache hit] BCC-CSM2-MR_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-04 16:27:55,630 INFO     [cache hit] BCC-CSM2-MR_historical_1980-2014_newprcp__snowFall__wateryear_sum.nc
+2026-08-04 16:27:55,736 INFO     [cache hit] BCC-CSM2-MR_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-04 16:27:55,850 INFO     [cache hit] BCC-CSM2-MR_historical_1980-2014_newprcp__precip__wateryear_sum.nc
+2026-08-05 05:38:46,983 INFO Processing LOCA2-WBM historical output for CanESM5 ...
+2026-08-05 05:38:47,153 INFO     [cache hit] CanESM5_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-05 05:38:47,321 INFO     [cache hit] CanESM5_historical_1980-2014_newprcp__snowFall__wateryear_sum.nc
+2026-08-05 05:38:47,422 INFO     [cache hit] CanESM5_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-05 05:38:47,515 INFO     [cache hit] CanESM5_historical_1980-2014_newprcp__precip__wateryear_sum.nc

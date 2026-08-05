@@ -7,7 +7,7 @@ import geopandas as gpd
 import regionmask
 
 # paths
-LIVNEH_REF = os.path.expanduser("~/LOCA2-WBM_code/livneh_monthly_1980-2014.nc")
+LIVNEH_REF = os.path.expanduser("~/LOCA2-WBM_code/livneh_monthly_1980-2013.nc")
 MODEL_DIR = "/net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_future"
 OUTPUT_DIR = os.path.expanduser("~/LOCA2-WBM_code/plots")
 SHAPEFILE_PATH = os.path.expanduser(
@@ -50,7 +50,7 @@ for model_var, livneh_var in var_mapping.items():
         obs_annual = obs_ts.resample(time='1YS').mean()
 
         ax.plot(obs_annual['time'].dt.year, obs_annual.values, color='black',
-                linewidth=2.5, label='Livneh Observations (1980-2014)')
+                linewidth=2.5, label='Livneh Observations (1980-2014)', zorder=4)
 
         # use last obs point to bridge year gap
         obs_bridge_year = int(obs_annual['time'].dt.year.values[-1])
@@ -93,7 +93,7 @@ for model_var, livneh_var in var_mapping.items():
 
                     # resample to annual timeline
                     annual_mean = spatial_mean.resample(time='1YS').mean()
-                    all_model_series.append(annual_mean.load())
+                    all_model_series.append((model_name, annual_mean.load()))
 
             except Exception as e:
                 print(
@@ -102,7 +102,8 @@ for model_var, livneh_var in var_mapping.items():
 
         if all_model_series:
             # concatenate individual model arrays
-            ensemble_ds = xr.concat(all_model_series, dim='model')
+            ensemble_ds = xr.concat(
+                [series for _, series in all_model_series], dim='model')
             ensemble_mean = ensemble_ds.mean(dim='model')
             years = ensemble_mean['time'].dt.year
 
@@ -111,9 +112,21 @@ for model_var, livneh_var in var_mapping.items():
             mean_connected = np.concatenate(
                 [[obs_bridge_value], ensemble_mean.values])
 
+            # plot thin individual model trendlines for this scenario
+            for model_name, model_series in all_model_series:
+                model_years = model_series['time'].dt.year
+                model_years_connected = np.concatenate(
+                    [[obs_bridge_year], model_years])
+                model_values_connected = np.concatenate(
+                    [[obs_bridge_value], model_series.values])
+                ax.plot(model_years_connected, model_values_connected,
+                        color=ssp_info['color'], linewidth=0.6, alpha=0.35,
+                        zorder=1, label='_nolegend_')
+
             # plot scenario multi-model average trendline
             ax.plot(years_connected, mean_connected,
-                    color=ssp_info['color'], linewidth=2, label=ssp_info['label'])
+                    color=ssp_info['color'], linewidth=2.5, label=ssp_info['label'],
+                    zorder=3)
 
             # shade the spread representing cross-model variation bounds
             ensemble_annual = ensemble_ds.resample(time='1YS').mean()
@@ -122,11 +135,11 @@ for model_var, livneh_var in var_mapping.items():
                 dim='model').values.flatten()
 
             # prepend obs value for spread too (zero spread at the bridge point)
-        min_connected = np.concatenate([[obs_bridge_value], ensemble_min])
-        max_connected = np.concatenate([[obs_bridge_value], ensemble_max])
+            min_connected = np.concatenate([[obs_bridge_value], ensemble_min])
+            max_connected = np.concatenate([[obs_bridge_value], ensemble_max])
 
-        ax.fill_between(years_connected, min_connected,
-                        max_connected, color=ssp_info['color'], alpha=0.10)
+            ax.fill_between(years_connected, min_connected,
+                            max_connected, color=ssp_info['color'], alpha=0.10)
 
     # era shading
     ax.axvspan(2015, 2040, color='royalblue', alpha=0.03)
