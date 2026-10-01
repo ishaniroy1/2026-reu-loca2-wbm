@@ -265,6 +265,73 @@ def normalize_temp_units(da, label):
     return da
 
 
+HIST_START, HIST_END = '1980-01-01', '2014-12-31'
+
+# ---------------------------------------------------------------------------
+# Season definitions for the bias maps. Each spans a set of calendar months;
+# "shift_months" lists which of those months belong to the PRECEDING
+# calendar year's instance of the season (e.g. December 1999 is part of
+# "winter 2000" alongside Jan/Feb 2000, same convention used throughout the
+# rest of this project for cold-season/water-year grouping).
+# ---------------------------------------------------------------------------
+SEASON_DEFINITIONS = {
+    "winter": {
+        "months": [12, 1, 2],
+        "shift_months": [12],
+        "label": "Winter (Dec-Feb)",
+    },
+    "cold_season": {
+        "months": [11, 12, 1, 2, 3, 4],
+        "shift_months": [11, 12],
+        "label": "Cold Season (Nov-Apr)",
+    },
+    "water_year": {
+        "months": [10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        "shift_months": [10, 11, 12],
+        "label": "Water Year (Oct-Sep)",
+    },
+}
+
+
+def aggregate_seasonal(da, operation, season_key):
+    """Slice to HIST_START-HIST_END, select only the season's months, group
+    them into season-years (handling the calendar-year-crossing months via
+    SEASON_DEFINITIONS[season_key]['shift_months']), and return one
+    days_in_month-weighted seasonal mean per season-year. Any season-year
+    missing one or more of its expected months (always true at the very
+    start/end of the historical record, since these seasons reach into the
+    adjacent calendar year) is dropped rather than averaged in as a partial
+    season."""
+    season = SEASON_DEFINITIONS[season_key]
+    da_sliced = da.sel(time=slice(HIST_START, HIST_END))
+    da_season = da_sliced.sel(time=da_sliced['time'].dt.month.isin(season['months']))
+
+    month = da_season['time'].dt.month
+    year = da_season['time'].dt.year
+    season_year = xr.where(month.isin(season['shift_months']), year + 1, year)
+    da_season = da_season.assign_coords(season_year=season_year)
+
+    # count how many of the season's months actually landed in each
+    # season-year group, so incomplete edge seasons can be dropped
+    month_flag = xr.ones_like(month, dtype=int)
+    month_flag = month_flag.assign_coords(season_year=season_year)
+    months_present = month_flag.groupby('season_year').sum()
+    complete_years = months_present['season_year'].where(
+        months_present == len(season['months']), drop=True)
+
+    if operation == "mean":
+        def _weighted_seasonal_mean(group):
+            weights = group.time.dt.days_in_month
+            return group.weighted(weights).mean(dim='time', skipna=True)
+        seasonal = da_season.groupby('season_year').map(_weighted_seasonal_mean)
+    elif operation == "sum":
+        seasonal = da_season.groupby('season_year').sum(dim='time', skipna=True)
+    else:
+        raise ValueError(f"Unknown aggregation operation: {operation}")
+
+    return seasonal.sel(season_year=complete_years.values)
+
+
 def aggregate_yearly(da, operation):
     """Slice to 1980-2014 and resample to annual resolution. "mean" is a
     days_in_month-weighted annual mean (calendar-aware, correct for a rate
@@ -282,10 +349,12 @@ def aggregate_yearly(da, operation):
         raise ValueError(f"Unknown aggregation operation: {operation}")
 
 
-def compute_climatology(var, operation, label, pattern, clip_geom):
+def compute_climatology(var, operation, label, pattern, clip_geom, season_key=None):
     """Load monthly files for one dataset (Livneh or a single model),
-    process to an annual time series, clip, then collapse (average) across
-    years to a single 2D (lat, lon) climatology field."""
+    process to an annual OR seasonal time series (season_key=None keeps the
+    original full-year behavior; otherwise one of SEASON_DEFINITIONS), clip,
+    then collapse (average) across years to a single 2D (lat, lon)
+    climatology field."""
     with xr.open_mfdataset(pattern, combine='by_coords', data_vars='all') as ds:
         da = ds[var]
         da = mask_fill_values(da)
@@ -295,11 +364,17 @@ def compute_climatology(var, operation, label, pattern, clip_geom):
         elif var in ('airTmax', 'airTmin'):
             da = normalize_temp_units(da, label)
 
-        yearly = aggregate_yearly(da, operation)
-        yearly = clip_to_boundary(yearly, clip_geom)
-        yearly = yearly.load()
+        if season_key is None:
+            period = aggregate_yearly(da, operation)
+            group_dim = 'time'
+        else:
+            period = aggregate_seasonal(da, operation, season_key)
+            group_dim = 'season_year'
 
-    return yearly.mean(dim='time', skipna=True)
+        period = clip_to_boundary(period, clip_geom)
+        period = period.load()
+
+    return period.mean(dim=group_dim, skipna=True)
 
 
 def compute_weighted_ensemble(data_dict, weights, label=""):
@@ -337,7 +412,7 @@ def mask_beyond_limit(bias_da, limit, label=""):
     return masked
 
 
-def plot_bias_map(var, bias_da, region_label, state_borders, out_name):
+def plot_bias_map(var, bias_da, region_label, state_borders, out_name, period_label="1980-2014"):
     """Single-panel diverging bias map (model ensemble - obs), using the
     fixed +/-BIAS_SCALE_LIMIT[var] color scale (not auto-computed from
     this map's own data), so every plot for a given variable is directly
@@ -366,7 +441,7 @@ def plot_bias_map(var, bias_da, region_label, state_borders, out_name):
     cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 
     ax.set_title(
-        f'{region_label} Weighted-Ensemble Bias, Model \u2212 Obs (1980-2014): {VAR_LABELS[var]}\n'
+        f'{region_label} Weighted-Ensemble Bias, Model \u2212 Obs, {period_label}: {VAR_LABELS[var]}\n'
         f'Red = {warm_word}, Blue = {cool_word}, White = 0',
         fontsize=11, fontweight='bold')
 
@@ -376,7 +451,7 @@ def plot_bias_map(var, bias_da, region_label, state_borders, out_name):
     print(f"Saved {out_path}")
 
 
-def plot_combined_bias_map(region_label, bias_dict, state_borders, out_name):
+def plot_combined_bias_map(region_label, bias_dict, state_borders, out_name, period_label="1980-2014"):
     """One figure, one panel per variable (airTmax, airTmin, precip), each
     using its own fixed +/-BIAS_SCALE_LIMIT[var] color scale."""
     var_order = [v for v in variables_config if v in bias_dict]
@@ -407,7 +482,7 @@ def plot_combined_bias_map(region_label, bias_dict, state_borders, out_name):
         cbar = fig.colorbar(mesh, ax=ax, shrink=0.8)
         cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 
-    fig.suptitle(f'{region_label} Weighted-Ensemble Bias, Model \u2212 Obs (1980-2014)',
+    fig.suptitle(f'{region_label} Weighted-Ensemble Bias, Model \u2212 Obs, {period_label}',
                  fontsize=14, fontweight='bold')
 
     out_path = os.path.join(OUTPUT_DIR, out_name)
@@ -421,95 +496,105 @@ conus_geom, conus_borders = load_conus_boundary()
 print(f"Loading Northeast boundary from {SHAPEFILE_PATH}")
 ne_geom, ne_borders = load_northeast_boundary()
 
-ensemble_bias_conus_all = {}
-ensemble_bias_ne_all = {}
+for season_key, season_info in SEASON_DEFINITIONS.items():
+    period_label = f"{season_info['label']}, {HIST_START[:4]}-{HIST_END[:4]}"
+    print(f"\n{'=' * 70}\nSEASON: {season_info['label']}\n{'=' * 70}")
 
-for var, operation in variables_config.items():
-    print(f"\n--- Processing variable: {var} (weighted ensemble bias) ---")
+    ensemble_bias_conus_all = {}
+    ensemble_bias_ne_all = {}
 
-    livneh_var_dir = os.path.join(LIVNEH_BASE_DIR, var)
-    livneh_pattern = os.path.join(livneh_var_dir, "wbm_*.nc")
-    if not glob.glob(livneh_pattern):
-        print(f"No Livneh files found for variable: {var} at {livneh_var_dir}")
-        continue
+    for var, operation in variables_config.items():
+        print(f"\n--- Processing variable: {var} ({season_key}, weighted ensemble bias) ---")
 
-    print(f"Computing Livneh [{var}] climatology (CONUS-clipped, common reference grid)...")
-    obs_clim = compute_climatology(var, operation, "Livneh", livneh_pattern, conus_geom)
-
-    model_bias_common = {}
-    for folder, name in zip(model_folders, model_names):
-        if name not in MODEL_WEIGHTS:
-            continue  # no point computing a model that'll be excluded anyway
-        model_pattern = os.path.join(folder, "monthly", var, "wbm_*.nc")
-        if not glob.glob(model_pattern):
-            print(f"  Skipping {name} [{var}]: no files found at {model_pattern}")
+        livneh_var_dir = os.path.join(LIVNEH_BASE_DIR, var)
+        livneh_pattern = os.path.join(livneh_var_dir, "wbm_*.nc")
+        if not glob.glob(livneh_pattern):
+            print(f"No Livneh files found for variable: {var} at {livneh_var_dir}")
             continue
 
-        try:
-            print(f"  Computing {name} [{var}] climatology...")
-            m_clim = compute_climatology(var, operation, name, model_pattern, conus_geom)
-            # regrid onto Livneh's grid so every model's bias lives on the
-            # SAME common grid before combining -- required since each
-            # model's own climatology may be on its own native grid
-            # bilinear (not nearest-neighbor) regridding -- nearest-neighbor
-            # can map several adjacent target cells to the SAME source cell
-            # wherever the two grids' resolution/alignment don't line up
-            # (common at complex coastlines/islands), producing small blocks
-            # of identical, often poorly-matched values. Linear interpolation
-            # blends between surrounding source cells instead, so it can't
-            # produce that repeated-block artifact. Cells outside the native
-            # grid's convex hull become NaN (no data) rather than a wrong
-            # extrapolated value, which is the correct trade-off here.
-            m_clim_common = m_clim.interp_like(obs_clim, method='linear')
-            model_bias = m_clim_common - obs_clim
-            # despeckle BEFORE adding to the ensemble -- a coastline/island
-            # regrid artifact in one model shouldn't get baked into the
-            # weighted ensemble at that cell (see DESPECKLE_* config above)
-            model_bias = despeckle_isolated_outliers(model_bias, label=f"{name}/{var}")
-            model_bias_common[name] = model_bias
-        except Exception as e:
-            print(f"  Skipping model {name} [{var}] due to calculation mismatch: {e}")
+        print(f"Computing Livneh [{var}] {season_key} climatology (CONUS-clipped, common reference grid)...")
+        obs_clim = compute_climatology(var, operation, "Livneh", livneh_pattern, conus_geom,
+                                        season_key=season_key)
+
+        model_bias_common = {}
+        for folder, name in zip(model_folders, model_names):
+            if name not in MODEL_WEIGHTS:
+                continue  # no point computing a model that'll be excluded anyway
+            model_pattern = os.path.join(folder, "monthly", var, "wbm_*.nc")
+            if not glob.glob(model_pattern):
+                print(f"  Skipping {name} [{var}]: no files found at {model_pattern}")
+                continue
+
+            try:
+                print(f"  Computing {name} [{var}] {season_key} climatology...")
+                m_clim = compute_climatology(var, operation, name, model_pattern, conus_geom,
+                                              season_key=season_key)
+                # regrid onto Livneh's grid so every model's bias lives on the
+                # SAME common grid before combining -- required since each
+                # model's own climatology may be on its own native grid
+                # bilinear (not nearest-neighbor) regridding -- nearest-neighbor
+                # can map several adjacent target cells to the SAME source cell
+                # wherever the two grids' resolution/alignment don't line up
+                # (common at complex coastlines/islands), producing small blocks
+                # of identical, often poorly-matched values. Linear interpolation
+                # blends between surrounding source cells instead, so it can't
+                # produce that repeated-block artifact. Cells outside the native
+                # grid's convex hull become NaN (no data) rather than a wrong
+                # extrapolated value, which is the correct trade-off here.
+                m_clim_common = m_clim.interp_like(obs_clim, method='linear')
+                model_bias = m_clim_common - obs_clim
+                # despeckle BEFORE adding to the ensemble -- a coastline/island
+                # regrid artifact in one model shouldn't get baked into the
+                # weighted ensemble at that cell (see DESPECKLE_* config above)
+                model_bias = despeckle_isolated_outliers(model_bias, label=f"{name}/{var}/{season_key}")
+                model_bias_common[name] = model_bias
+            except Exception as e:
+                print(f"  Skipping model {name} [{var}] due to calculation mismatch: {e}")
+                continue
+
+        if not model_bias_common:
+            print(f"No models produced valid bias results for {var} ({season_key}); skipping ensemble maps.")
             continue
 
-    if not model_bias_common:
-        print(f"No models produced valid bias results for {var}; skipping ensemble maps.")
-        continue
+        print(f"  Building weighted ensemble ({len(model_bias_common)} models)...")
+        ensemble_bias_conus = compute_weighted_ensemble(model_bias_common, MODEL_WEIGHTS, label=f"{var}/{season_key}")
 
-    print(f"  Building weighted ensemble ({len(model_bias_common)} models)...")
-    ensemble_bias_conus = compute_weighted_ensemble(model_bias_common, MODEL_WEIGHTS, label=var)
+        if var == 'precip':
+            # convert absolute bias (mm/day) to percent bias relative to obs;
+            # mathematically identical to averaging per-model percent biases
+            # first, since obs is the same fixed denominator for every model
+            # at a given cell (the weighted mean above is linear). Cells where
+            # obs is too close to zero are masked rather than left to blow up
+            # to a meaningless percentage.
+            safe_obs = obs_clim.where(obs_clim >= MIN_OBS_PRECIP_FOR_PCT)
+            ensemble_bias_conus = (ensemble_bias_conus / safe_obs) * 100
+            # re-despeckle after the percent-bias conversion -- dividing by a
+            # small-but-not-excluded obs value can still amplify any residual
+            # single-cell noise into a large percentage
+            ensemble_bias_conus = despeckle_isolated_outliers(ensemble_bias_conus, label=f"ensemble/{var}/{season_key}/pct")
 
-    if var == 'precip':
-        # convert absolute bias (mm/day) to percent bias relative to obs;
-        # mathematically identical to averaging per-model percent biases
-        # first, since obs is the same fixed denominator for every model
-        # at a given cell (the weighted mean above is linear). Cells where
-        # obs is too close to zero are masked rather than left to blow up
-        # to a meaningless percentage.
-        safe_obs = obs_clim.where(obs_clim >= MIN_OBS_PRECIP_FOR_PCT)
-        ensemble_bias_conus = (ensemble_bias_conus / safe_obs) * 100
-        # re-despeckle after the percent-bias conversion -- dividing by a
-        # small-but-not-excluded obs value can still amplify any residual
-        # single-cell noise into a large percentage
-        ensemble_bias_conus = despeckle_isolated_outliers(ensemble_bias_conus, label=f"ensemble/{var}/pct")
+        ensemble_bias_conus = mask_beyond_limit(ensemble_bias_conus, BIAS_SCALE_LIMIT[var], label=f"{var}/{season_key}")
 
-    ensemble_bias_conus = mask_beyond_limit(ensemble_bias_conus, BIAS_SCALE_LIMIT[var], label=var)
+        plot_bias_map(var, ensemble_bias_conus, "CONUS", conus_borders,
+                      f"conus_{var}_bias_ensemble_weighted_{season_key}.png",
+                      period_label=period_label)
 
-    plot_bias_map(var, ensemble_bias_conus, "CONUS", conus_borders,
-                  f"conus_{var}_bias_ensemble_weighted.png")
+        print(f"  Clipping ensemble bias to Northeast...")
+        ensemble_bias_ne = clip_to_boundary(ensemble_bias_conus, ne_geom)
+        plot_bias_map(var, ensemble_bias_ne, "Northeast", ne_borders,
+                      f"northeast_{var}_bias_ensemble_weighted_{season_key}.png",
+                      period_label=period_label)
 
-    print(f"  Clipping ensemble bias to Northeast...")
-    ensemble_bias_ne = clip_to_boundary(ensemble_bias_conus, ne_geom)
-    plot_bias_map(var, ensemble_bias_ne, "Northeast", ne_borders,
-                  f"northeast_{var}_bias_ensemble_weighted.png")
+        ensemble_bias_conus_all[var] = ensemble_bias_conus
+        ensemble_bias_ne_all[var] = ensemble_bias_ne
 
-    ensemble_bias_conus_all[var] = ensemble_bias_conus
-    ensemble_bias_ne_all[var] = ensemble_bias_ne
-
-if ensemble_bias_conus_all:
-    plot_combined_bias_map("CONUS", ensemble_bias_conus_all, conus_borders,
-                            "conus_allvars_bias_ensemble_weighted.png")
-if ensemble_bias_ne_all:
-    plot_combined_bias_map("Northeast", ensemble_bias_ne_all, ne_borders,
-                            "northeast_allvars_bias_ensemble_weighted.png")
+    if ensemble_bias_conus_all:
+        plot_combined_bias_map("CONUS", ensemble_bias_conus_all, conus_borders,
+                                f"conus_allvars_bias_ensemble_weighted_{season_key}.png",
+                                period_label=period_label)
+    if ensemble_bias_ne_all:
+        plot_combined_bias_map("Northeast", ensemble_bias_ne_all, ne_borders,
+                                f"northeast_allvars_bias_ensemble_weighted_{season_key}.png",
+                                period_label=period_label)
 
 print("\nProcess complete")
