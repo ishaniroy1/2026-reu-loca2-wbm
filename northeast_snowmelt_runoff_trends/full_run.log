@@ -5265,3 +5265,167 @@ nohup: ignoring input
 2026-08-05 05:38:47,321 INFO     [cache hit] CanESM5_historical_1980-2014_newprcp__snowFall__wateryear_sum.nc
 2026-08-05 05:38:47,422 INFO     [cache hit] CanESM5_historical_1980-2014_newprcp__precip-snowFall__merged.nc
 2026-08-05 05:38:47,515 INFO     [cache hit] CanESM5_historical_1980-2014_newprcp__precip__wateryear_sum.nc
+2026-08-05 17:47:47,333 INFO Processing LOCA2-WBM historical output for EC-Earth3-Veg ...
+2026-08-05 17:47:47,595 INFO     [cache hit] EC-Earth3-Veg_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-05 17:47:47,720 INFO     [cache hit] EC-Earth3-Veg_historical_1980-2014_newprcp__snowFall__wateryear_sum.nc
+2026-08-05 17:47:47,821 INFO     [cache hit] EC-Earth3-Veg_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-05 17:47:47,967 INFO     [cache hit] EC-Earth3-Veg_historical_1980-2014_newprcp__precip__wateryear_sum.nc
+2026-08-06 05:09:22,060 INFO Processing LOCA2-WBM historical output for EC-Earth3 ...
+2026-08-06 05:09:25,459 INFO     [cache hit] EC-Earth3_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-06 05:09:25,649 INFO     [cache hit] EC-Earth3_historical_1980-2014_newprcp__snowFall__wateryear_sum.nc
+2026-08-06 05:09:25,772 INFO     [cache hit] EC-Earth3_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-06 05:09:25,955 INFO     [cache hit] EC-Earth3_historical_1980-2014_newprcp__precip__wateryear_sum.nc
+2026-08-06 16:15:02,875 INFO Processing LOCA2-WBM historical output for GFDL-CM4 ...
+2026-08-06 16:15:06,324 INFO     [cache hit] GFDL-CM4_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-06 16:15:06,602 INFO     [cache hit] GFDL-CM4_historical_1980-2014_newprcp__snowFall__wateryear_sum.nc
+2026-08-06 16:15:06,734 INFO     [cache hit] GFDL-CM4_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-06 16:15:06,943 INFO     [cache hit] GFDL-CM4_historical_1980-2014_newprcp__precip__wateryear_sum.nc
+2026-08-07 03:15:49,919 INFO Processing LOCA2-WBM historical output for GFDL-ESM4 ...
+2026-08-07 03:15:52,343 INFO     [cache hit] GFDL-ESM4_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-07 03:15:52,588 INFO     [cache hit] GFDL-ESM4_historical_1980-2014_newprcp__snowFall__wateryear_sum.nc
+2026-08-07 03:15:52,722 INFO     [cache hit] GFDL-ESM4_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-07 03:15:53,253 INFO     [cache hit] GFDL-ESM4_historical_1980-2014_newprcp__precip__wateryear_sum.nc
+2026-08-07 14:20:35,500 INFO Processing LOCA2-WBM historical output for INM-CM4-8 ...
+2026-08-07 14:20:38,827 INFO     [cache hit] INM-CM4-8_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-07 14:20:39,012 INFO     [cache hit] INM-CM4-8_historical_1980-2014_newprcp__snowFall__wateryear_sum.nc
+2026-08-07 14:20:39,140 INFO     [cache hit] INM-CM4-8_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-07 14:20:39,365 INFO     [cache hit] INM-CM4-8_historical_1980-2014_newprcp__precip__wateryear_sum.nc
+2026-08-08 01:29:44,160 INFO Processing LOCA2-WBM historical output for INM-CM5-0 ...
+2026-08-08 01:29:44,162 WARNING Skipping INM-CM5-0 (historical): No daily files found at /net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_historical/INM-CM5-0_historical_1980-2014_newprcp/daily/wbm_*.nc
+2026-08-08 01:29:44,162 INFO Processing LOCA2-WBM historical output for IPSL-CM6A-LR ...
+2026-08-08 01:29:47,750 INFO     [cache hit] IPSL-CM6A-LR_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-08 01:29:47,975 INFO     [cache hit] IPSL-CM6A-LR_historical_1980-2014_newprcp__snowFall__wateryear_sum.nc
+2026-08-08 01:29:48,119 INFO     [cache hit] IPSL-CM6A-LR_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-08 01:29:48,541 INFO     [cache hit] IPSL-CM6A-LR_historical_1980-2014_newprcp__precip__wateryear_sum.nc
+2026-08-08 12:35:56,507 INFO Processing LOCA2-WBM historical output for KACE-1-0-G ...
+2026-08-08 12:35:56,518 WARNING Skipping KACE-1-0-G (historical): No daily files found at /net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_historical/KACE-1-0-G_historical_1980-2014_newprcp/daily/wbm_*.nc
+2026-08-08 12:35:56,518 INFO Processing LOCA2-WBM historical output for MIROC6 ...
+2026-08-08 12:36:00,111 INFO     [cache hit] MIROC6_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-08 12:36:00,325 INFO     [cache hit] MIROC6_historical_1980-2014_newprcp__snowFall__wateryear_sum.nc
+2026-08-08 12:36:00,454 INFO     [cache hit] MIROC6_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-08 12:36:00,759 INFO     [cache hit] MIROC6_historical_1980-2014_newprcp__precip__wateryear_sum.nc
+2026-08-08 23:42:08,535 INFO Processing LOCA2-WBM historical output for MPI-ESM1-2-HR ...
+2026-08-08 23:42:11,839 INFO     [cache hit] MPI-ESM1-2-HR_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-08 23:42:12,038 INFO     [cache hit] MPI-ESM1-2-HR_historical_1980-2014_newprcp__snowFall__wateryear_sum.nc
+2026-08-08 23:42:12,183 INFO     [cache hit] MPI-ESM1-2-HR_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-08 23:42:12,412 INFO     [cache hit] MPI-ESM1-2-HR_historical_1980-2014_newprcp__precip__wateryear_sum.nc
+2026-08-09 12:53:43,603 INFO Processing LOCA2-WBM historical output for MPI-ESM1-2-LR ...
+2026-08-09 12:53:46,948 INFO     [cache hit] MPI-ESM1-2-LR_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-09 12:53:47,194 INFO     [cache hit] MPI-ESM1-2-LR_historical_1980-2014_newprcp__snowFall__wateryear_sum.nc
+2026-08-09 12:53:47,351 INFO     [cache hit] MPI-ESM1-2-LR_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-09 12:53:47,572 INFO     [cache hit] MPI-ESM1-2-LR_historical_1980-2014_newprcp__precip__wateryear_sum.nc
+2026-08-10 01:52:43,408 INFO Processing LOCA2-WBM historical output for MRI-ESM2-0 ...
+2026-08-10 01:52:47,106 INFO     [cache hit] MRI-ESM2-0_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-10 01:52:47,273 INFO     [cache hit] MRI-ESM2-0_historical_1980-2014_newprcp__snowFall__wateryear_sum.nc
+2026-08-10 01:52:47,416 INFO     [cache hit] MRI-ESM2-0_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-10 01:52:47,808 INFO     [cache hit] MRI-ESM2-0_historical_1980-2014_newprcp__precip__wateryear_sum.nc
+2026-08-10 14:49:28,798 INFO Processing LOCA2-WBM historical output for NorESM2-LM ...
+2026-08-10 14:49:29,731 INFO     [cache hit] NorESM2-LM_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-10 14:49:29,900 INFO     [cache hit] NorESM2-LM_historical_1980-2014_newprcp__snowFall__wateryear_sum.nc
+2026-08-10 14:49:30,027 INFO     [cache hit] NorESM2-LM_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-10 14:49:30,207 INFO     [cache hit] NorESM2-LM_historical_1980-2014_newprcp__precip__wateryear_sum.nc
+2026-08-11 03:25:36,011 INFO Processing LOCA2-WBM historical output for NorESM2-MM ...
+2026-08-11 03:25:36,978 INFO     [cache hit] NorESM2-MM_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-11 03:25:37,127 INFO     [cache hit] NorESM2-MM_historical_1980-2014_newprcp__snowFall__wateryear_sum.nc
+2026-08-11 03:25:37,224 INFO     [cache hit] NorESM2-MM_historical_1980-2014_newprcp__precip-snowFall__merged.nc
+2026-08-11 03:25:37,381 INFO     [cache hit] NorESM2-MM_historical_1980-2014_newprcp__precip__wateryear_sum.nc
+creating polygons for each pixel...
+lat/lon bounds not found in dataset; they will be created.
+calculating overlaps between pixels and output polygons...
+success!
+aggregating sp_ratio...
+all variables aggregated to polygons!
+aggregating snowMelt...
+all variables aggregated to polygons!
+aggregating sp_ratio...
+all variables aggregated to polygons!
+aggregating snowMelt...
+all variables aggregated to polygons!
+aggregating sp_ratio...
+all variables aggregated to polygons!
+aggregating snowMelt...
+all variables aggregated to polygons!
+aggregating sp_ratio...
+all variables aggregated to polygons!
+aggregating snowMelt...
+all variables aggregated to polygons!
+aggregating sp_ratio...
+all variables aggregated to polygons!
+aggregating snowMelt...
+all variables aggregated to polygons!
+aggregating sp_ratio...
+all variables aggregated to polygons!
+aggregating snowMelt...
+all variables aggregated to polygons!
+aggregating sp_ratio...
+all variables aggregated to polygons!
+aggregating snowMelt...
+all variables aggregated to polygons!
+aggregating sp_ratio...
+all variables aggregated to polygons!
+aggregating snowMelt...
+all variables aggregated to polygons!
+aggregating sp_ratio...
+all variables aggregated to polygons!
+aggregating snowMelt...
+all variables aggregated to polygons!
+aggregating sp_ratio...
+all variables aggregated to polygons!
+aggregating snowMelt...
+all variables aggregated to polygons!
+aggregating sp_ratio...
+all variables aggregated to polygons!
+aggregating snowMelt...
+all variables aggregated to polygons!
+aggregating sp_ratio...
+all variables aggregated to polygons!
+aggregating snowMelt...
+all variables aggregated to polygons!
+aggregating sp_ratio...
+all variables aggregated to polygons!
+aggregating snowMelt...
+all variables aggregated to polygons!
+aggregating sp_ratio...
+all variables aggregated to polygons!
+aggregating snowMelt...
+all variables aggregated to polygons!
+aggregating sp_ratio...
+all variables aggregated to polygons!
+aggregating snowMelt...
+all variables aggregated to polygons!
+aggregating sp_ratio...
+all variables aggregated to polygons!
+aggregating snowMelt...
+all variables aggregated to polygons!
+Traceback (most recent call last):
+  File "/net/home/wsag/ir1101/LOCA2-WBM_code/northeast_snowmelt_runoff_trends/run_pipeline.py", line 230, in <module>
+    main()
+    ~~~~^^
+  File "/net/home/wsag/ir1101/LOCA2-WBM_code/northeast_snowmelt_runoff_trends/run_pipeline.py", line 176, in main
+    hist = run_historical()
+  File "/net/home/wsag/ir1101/LOCA2-WBM_code/northeast_snowmelt_runoff_trends/run_pipeline.py", line 141, in run_historical
+    result = _run_period(config.LOCA2WBM_HIST_DIR, "historical")
+  File "/net/home/wsag/ir1101/LOCA2-WBM_code/northeast_snowmelt_runoff_trends/run_pipeline.py", line 134, in _run_period
+    sp_ensemble = sp_df.groupby(["huc8", "name", "water_year"], as_index=False)["sp_ratio"].mean()
+                  ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/net/home/wsag/ir1101/miniconda3/lib/python3.13/site-packages/pandas/util/_decorators.py", line 336, in wrapper
+    return func(*args, **kwargs)
+  File "/net/home/wsag/ir1101/miniconda3/lib/python3.13/site-packages/pandas/core/frame.py", line 10833, in groupby
+    return DataFrameGroupBy(
+        obj=self,
+    ...<6 lines>...
+        dropna=dropna,
+    )
+  File "/net/home/wsag/ir1101/miniconda3/lib/python3.13/site-packages/pandas/core/groupby/groupby.py", line 1095, in __init__
+    grouper, exclusions, obj = get_grouper(
+                               ~~~~~~~~~~~^
+        obj,
+        ^^^^
+    ...<4 lines>...
+        dropna=self.dropna,
+        ^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/net/home/wsag/ir1101/miniconda3/lib/python3.13/site-packages/pandas/core/groupby/grouper.py", line 901, in get_grouper
+    raise KeyError(gpr)
+KeyError: 'water_year'

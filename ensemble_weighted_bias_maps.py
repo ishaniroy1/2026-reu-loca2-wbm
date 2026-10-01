@@ -74,6 +74,62 @@ BIAS_SCALE_LIMIT = {
 MIN_OBS_PRECIP_FOR_PCT = 0.1  # mm/day
 
 # ---------------------------------------------------------------------------
+# Despeckle filter: flags isolated single-cell outliers (e.g. coastline/
+# island cells where nearest-neighbor regridding between the model's native
+# grid and Livneh's grid mismatches, or where an all_touched=True coastal
+# clip keeps a mostly-ocean cell with poor underlying data support). A true
+# regional bias signal is spatially smooth; a cell that's wildly different
+# from every one of its immediate neighbors is very unlikely to be real.
+#
+# Method: for each cell, compare its value to the median of its (up to 8)
+# immediate neighbors. Flag as an outlier if the deviation exceeds
+# DESPECKLE_FACTOR times the local median absolute deviation (MAD) of those
+# neighbors. Flagged cells are set to NaN (same treatment as any other
+# masked-out cell -- shows as blank/white on the map).
+# ---------------------------------------------------------------------------
+DESPECKLE_WINDOW = 3          # 3x3 neighborhood (8 surrounding cells)
+DESPECKLE_FACTOR = 4.0        # flag if |value - local median| > factor * local MAD
+DESPECKLE_MIN_NEIGHBORS = 4   # require at least this many valid neighbors to judge
+
+
+def despeckle_isolated_outliers(da, window=DESPECKLE_WINDOW, factor=DESPECKLE_FACTOR,
+                                 min_valid_neighbors=DESPECKLE_MIN_NEIGHBORS, label=""):
+    """Flag (set to NaN) grid cells whose value deviates sharply from their
+    immediate neighbors, targeting isolated single-cell artifacts (coastline/
+    island regrid mismatches) without touching genuinely smooth, spatially
+    coherent bias patterns elsewhere on the map."""
+    vals = da.values.astype(float)
+    ny, nx = vals.shape
+    pad = window // 2
+    padded = np.pad(vals, pad, mode='edge')
+
+    neighbor_stack = []
+    for dy in range(window):
+        for dx in range(window):
+            if dy == pad and dx == pad:
+                continue  # skip the center cell itself
+            neighbor_stack.append(padded[dy:dy + ny, dx:dx + nx])
+    neighbor_stack = np.stack(neighbor_stack, axis=0)
+
+    with np.errstate(invalid='ignore'):
+        n_valid = np.sum(~np.isnan(neighbor_stack), axis=0)
+        local_median = np.nanmedian(neighbor_stack, axis=0)
+        local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+
+    local_mad_safe = np.where(local_mad < 1e-6, 1e-6, local_mad)
+    deviation = np.abs(vals - local_median) / local_mad_safe
+
+    is_outlier = (deviation > factor) & (n_valid >= min_valid_neighbors) & ~np.isnan(vals)
+    n_flagged = int(np.sum(is_outlier))
+    if n_flagged > 0:
+        tag = f" [{label}]" if label else ""
+        print(f"    [despeckle{tag}] flagged {n_flagged} isolated outlier cell(s) as NaN")
+
+    cleaned = np.where(is_outlier, np.nan, vals)
+    return xr.DataArray(cleaned, coords=da.coords, dims=da.dims, attrs=da.attrs)
+
+
+# ---------------------------------------------------------------------------
 # Ensemble weights (e.g. climate-sensitivity-informed weighting -- models
 # that run overly/under sensitive get downweighted). Ensemble average is:
 #     sum(w_i * model_i) / sum(w_i)
@@ -388,7 +444,12 @@ for var, operation in variables_config.items():
             # SAME common grid before combining -- required since each
             # model's own climatology may be on its own native grid
             m_clim_common = m_clim.interp_like(obs_clim, method='nearest')
-            model_bias_common[name] = m_clim_common - obs_clim
+            model_bias = m_clim_common - obs_clim
+            # despeckle BEFORE adding to the ensemble -- a coastline/island
+            # regrid artifact in one model shouldn't get baked into the
+            # weighted ensemble at that cell (see DESPECKLE_* config above)
+            model_bias = despeckle_isolated_outliers(model_bias, label=f"{name}/{var}")
+            model_bias_common[name] = model_bias
         except Exception as e:
             print(f"  Skipping model {name} [{var}] due to calculation mismatch: {e}")
             continue
@@ -409,6 +470,10 @@ for var, operation in variables_config.items():
         # to a meaningless percentage.
         safe_obs = obs_clim.where(obs_clim >= MIN_OBS_PRECIP_FOR_PCT)
         ensemble_bias_conus = (ensemble_bias_conus / safe_obs) * 100
+        # re-despeckle after the percent-bias conversion -- dividing by a
+        # small-but-not-excluded obs value can still amplify any residual
+        # single-cell noise into a large percentage
+        ensemble_bias_conus = despeckle_isolated_outliers(ensemble_bias_conus, label=f"ensemble/{var}/pct")
 
     ensemble_bias_conus = mask_beyond_limit(ensemble_bias_conus, BIAS_SCALE_LIMIT[var], label=var)
 
