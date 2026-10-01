@@ -81,15 +81,23 @@ MIN_OBS_PRECIP_FOR_PCT = 0.1  # mm/day
 # regional bias signal is spatially smooth; a cell that's wildly different
 # from every one of its immediate neighbors is very unlikely to be real.
 #
-# Method: for each cell, compare its value to the median of its (up to 8)
+# Method: for each cell, compare its value to the median of its (up to 24)
 # immediate neighbors. Flag as an outlier if the deviation exceeds
 # DESPECKLE_FACTOR times the local median absolute deviation (MAD) of those
 # neighbors. Flagged cells are set to NaN (same treatment as any other
 # masked-out cell -- shows as blank/white on the map).
 # ---------------------------------------------------------------------------
-DESPECKLE_WINDOW = 3          # 3x3 neighborhood (8 surrounding cells)
-DESPECKLE_FACTOR = 4.0        # flag if |value - local median| > factor * local MAD
-DESPECKLE_MIN_NEIGHBORS = 4   # require at least this many valid neighbors to judge
+DESPECKLE_WINDOW = 5          # 5x5 neighborhood (24 surrounding cells) -- wider
+                               # than 3x3 so small islands (Nantucket, Martha's
+                               # Vineyard, etc.) still have enough candidate
+                               # neighbors even though most of a 3x3 window
+                               # around them is ocean/NaN
+DESPECKLE_FACTOR = 3.5        # flag if |value - local median| > factor * local MAD
+DESPECKLE_MIN_NEIGHBORS = 2   # lowered from 4 -- a strict minimum was silently
+                               # skipping small islands/sparse coastal cells
+                               # (exactly the cells most likely to need this
+                               # check), since they rarely have >=4 valid
+                               # neighbors in any window
 
 
 def despeckle_isolated_outliers(da, window=DESPECKLE_WINDOW, factor=DESPECKLE_FACTOR,
