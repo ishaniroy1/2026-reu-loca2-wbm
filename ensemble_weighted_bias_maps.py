@@ -443,7 +443,16 @@ for var, operation in variables_config.items():
             # regrid onto Livneh's grid so every model's bias lives on the
             # SAME common grid before combining -- required since each
             # model's own climatology may be on its own native grid
-            m_clim_common = m_clim.interp_like(obs_clim, method='nearest')
+            # bilinear (not nearest-neighbor) regridding -- nearest-neighbor
+            # can map several adjacent target cells to the SAME source cell
+            # wherever the two grids' resolution/alignment don't line up
+            # (common at complex coastlines/islands), producing small blocks
+            # of identical, often poorly-matched values. Linear interpolation
+            # blends between surrounding source cells instead, so it can't
+            # produce that repeated-block artifact. Cells outside the native
+            # grid's convex hull become NaN (no data) rather than a wrong
+            # extrapolated value, which is the correct trade-off here.
+            m_clim_common = m_clim.interp_like(obs_clim, method='linear')
             model_bias = m_clim_common - obs_clim
             # despeckle BEFORE adding to the ensemble -- a coastline/island
             # regrid artifact in one model shouldn't get baked into the

@@ -393,7 +393,11 @@ for var, operation in variables_config.items():
             m_clim = compute_climatology(var, operation, name, model_pattern, conus_geom)
             model_clims[name] = m_clim
 
-            obs_regrid = obs_clim.interp_like(m_clim, method='nearest')
+            # bilinear (not nearest-neighbor) regridding -- see the matching
+            # note in ensemble_weighted_bias_maps.py for why nearest-neighbor
+            # produces small blocks of identical, poorly-matched values at
+            # coastlines/islands, which linear interpolation avoids.
+            obs_regrid = obs_clim.interp_like(m_clim, method='linear')
             if var == 'precip':
                 bias = (m_clim - obs_regrid) / obs_regrid * 100
             else:
