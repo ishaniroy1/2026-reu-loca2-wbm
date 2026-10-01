@@ -21,10 +21,14 @@ call partition()/process_source_to_sp_ratio(), which exist for the case of
 re-deriving snow/rain from temperature when a native snowFall variable isn't
 already available.
 
-Reuses the same methodology fixes established for the bias maps: bilinear
-(not nearest-neighbor) regridding onto a common grid before combining
-models, and the despeckle filter for isolated single-cell/small-cluster
-regrid artifacts at coastlines and islands.
+Reuses the bilinear (not nearest-neighbor) regridding fix established for
+the bias maps. Does NOT use the despeckle filter from the bias-map scripts,
+though: despeckle works by flagging valid-but-locally-anomalous values and
+turning them into NaN, which suits the bias maps (smooth by construction)
+but incorrectly strips real fine-scale terrain-driven structure out of a
+raw S/P ratio field. Instead, this script uses a gap-fill step that only
+ever fills a NaN cell with its valid neighbors' mean -- it never modifies a
+cell that already has a value.
 """
 
 import glob
@@ -86,21 +90,30 @@ MODEL_WEIGHTS = {
 }
 
 # ---------------------------------------------------------------------------
-# Despeckle filter -- same tuned settings as the bias maps (5x5 window, low
-# min-neighbor requirement so sparse island/coastal cells still get
-# evaluated; see the chat history for why these specific values were chosen).
+# Gap fill (NOT despeckle -- deliberately removed for S/P ratio). Despeckle
+# works by flagging VALID values as outliers and turning them into NaN
+# gaps; that's appropriate for the bias maps, which are smooth by
+# construction (model-minus-obs), but raw S/P ratio has real fine-scale
+# local structure (terrain, elevation transitions), so the same technique
+# ends up flagging genuine local variation as "outliers" -- that's exactly
+# what produced the scattered blank/white cells, since a despeckled cell
+# IS a NaN cell and renders as blank.
+#
+# This function does the opposite: it NEVER touches a cell that already has
+# a valid value, and only fills a cell that is NaN but has enough valid
+# neighbors to make a reasonable local estimate (neighbor mean). A genuinely
+# large no-data region (ocean, outside every model's native grid) still has
+# mostly-NaN neighbors and is correctly left alone.
 # ---------------------------------------------------------------------------
-DESPECKLE_WINDOW = 5
-DESPECKLE_FACTOR = 3.5
-DESPECKLE_MIN_NEIGHBORS = 2
+GAPFILL_WINDOW = 3
+GAPFILL_MIN_VALID_NEIGHBORS = 4
 
 
-def despeckle_isolated_outliers(da, window=DESPECKLE_WINDOW, factor=DESPECKLE_FACTOR,
-                                 min_valid_neighbors=DESPECKLE_MIN_NEIGHBORS, label=""):
-    """Flag (set to NaN) grid cells whose value deviates sharply from their
-    immediate neighbors, targeting isolated single-cell/small-cluster
-    artifacts (coastline/island regrid mismatches) without touching
-    genuinely smooth, spatially coherent S/P ratio patterns elsewhere."""
+def fill_isolated_nan_gaps(da, window=GAPFILL_WINDOW,
+                            min_valid_neighbors=GAPFILL_MIN_VALID_NEIGHBORS, label=""):
+    """Fill a NaN cell with the mean of its valid immediate neighbors, but
+    only when there are enough of them to be a reasonable estimate. Cells
+    that already have a valid value are never modified."""
     vals = da.values.astype(float)
     ny, nx = vals.shape
     pad = window // 2
@@ -116,20 +129,16 @@ def despeckle_isolated_outliers(da, window=DESPECKLE_WINDOW, factor=DESPECKLE_FA
 
     with np.errstate(invalid='ignore'):
         n_valid = np.sum(~np.isnan(neighbor_stack), axis=0)
-        local_median = np.nanmedian(neighbor_stack, axis=0)
-        local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+        neighbor_mean = np.nanmean(neighbor_stack, axis=0)
 
-    local_mad_safe = np.where(local_mad < 1e-6, 1e-6, local_mad)
-    deviation = np.abs(vals - local_median) / local_mad_safe
-
-    is_outlier = (deviation > factor) & (n_valid >= min_valid_neighbors) & ~np.isnan(vals)
-    n_flagged = int(np.sum(is_outlier))
-    if n_flagged > 0:
+    is_fillable_gap = np.isnan(vals) & (n_valid >= min_valid_neighbors)
+    n_filled = int(np.sum(is_fillable_gap))
+    if n_filled > 0:
         tag = f" [{label}]" if label else ""
-        print(f"    [despeckle{tag}] flagged {n_flagged} isolated outlier cell(s) as NaN")
+        print(f"    [gapfill{tag}] filled {n_filled} isolated NaN cell(s) from neighbor mean")
 
-    cleaned = np.where(is_outlier, np.nan, vals)
-    return xr.DataArray(cleaned, coords=da.coords, dims=da.dims, attrs=da.attrs)
+    filled = np.where(is_fillable_gap, neighbor_mean, vals)
+    return xr.DataArray(filled, coords=da.coords, dims=da.dims, attrs=da.attrs)
 
 
 # --- boundary / clipping helpers (same pattern as the bias-map scripts) ---
@@ -335,7 +344,7 @@ for season_key, sp_fn in SP_RATIO_FUNCTIONS.items():
             # bias-map scripts for why nearest-neighbor produces blocky
             # artifacts at coastlines/islands
             sp_clim_common = sp_clim.interp_like(ref_grid, method='linear')
-            sp_clim_common = despeckle_isolated_outliers(sp_clim_common, label=f"{name}/{season_key}")
+            sp_clim_common = fill_isolated_nan_gaps(sp_clim_common, label=f"{name}/{season_key}")
             model_sp_common[name] = sp_clim_common
         except Exception as e:
             print(f"  Skipping model {name} [{season_key}] due to calculation mismatch: {e}")
@@ -348,6 +357,10 @@ for season_key, sp_fn in SP_RATIO_FUNCTIONS.items():
     print(f"  Building weighted ensemble ({len(model_sp_common)} models)...")
     ensemble_sp_conus = compute_weighted_ensemble(model_sp_common, MODEL_WEIGHTS, label=season_key)
     ensemble_sp_conus = ensemble_sp_conus.clip(min=0, max=1)
+    # one more gap-fill pass at the ensemble level, in case a cell is NaN
+    # in just enough individual models that the weighted mean itself still
+    # comes out NaN there, even though each model was already gap-filled
+    ensemble_sp_conus = fill_isolated_nan_gaps(ensemble_sp_conus, label=f"ensemble/{season_key}")
 
     plot_sp_map(ensemble_sp_conus, "CONUS", season_key, conus_borders,
                 f"conus_sp_ratio_ensemble_weighted_{season_key}.png")
