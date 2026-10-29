@@ -12,7 +12,8 @@ import glob
 import numpy as np
 import xarray as xr
 import matplotlib.pyplot as plt
-from matplotlib.ticker import FormatStrFormatter
+from matplotlib.ticker import FormatStrFormatter, MaxNLocator
+from matplotlib.colors import LinearSegmentedColormap
 import geopandas as gpd
 import rioxarray
 
@@ -48,24 +49,52 @@ variables_config = {
 }
 
 VAR_LABELS = {
-    "airTmax": "Tmax (\u00b0C)",
-    "airTmin": "Tmin (\u00b0C)",
+    "airTmax": "Tmax (°C)",
+    "airTmin": "Tmin (°C)",
     "precip": "Precip (%)",
 }
 
 FILL_VALUE = -9999.0
 FILL_ABS_THRESHOLD = 1e10
 
-# Fixed bias-map color scale AND hardcoded mask threshold (values beyond
-# this are set to NaN rather than shown), applied per variable. airTmax/
-# airTmin are unchanged (degC, +/-4). precip is now expressed as PERCENT
-# bias rather than mm/day (see the percent-conversion step in the main
-# loop below), so its limit is in percent, not mm/day -- adjust if you
-# want a tighter/looser cutoff than +/-100%.
+# Hard sanity-bound bias-map cutoff: values beyond this are set to NaN as
+# physically implausible (mask_beyond_limit). This is intentionally generous
+# -- real Tmin/Tmax bias routinely exceeds +/-1 degC in places, so this
+# cutoff must stay well above the DISPLAY range below, or mask_beyond_limit
+# starts NaN-ing out real data, which fill_isolated_nan_gaps then has to
+# patch with large blocky neighbor-averages (exactly the "pixelated" look
+# that shows up if this is set too tight).
 BIAS_SCALE_LIMIT = {
     "airTmax": 4.0,
     "airTmin": 4.0,
     "precip": 100.0,
+}
+
+# DISPLAY color-scale range (vmin/vmax passed to pcolormesh) -- separate
+# from BIAS_SCALE_LIMIT above. This just clips/saturates the colormap at
+# its ends; it does NOT delete or alter any data, unlike BIAS_SCALE_LIMIT.
+# airTmax/airTmin share the same +/-1 degC scale, as requested.
+DISPLAY_LIMIT = {
+    "airTmax": 1.0,
+    "airTmin": 1.0,
+    "precip": 100.0,
+}
+
+# Diverging colormap for each variable. airTmax/airTmin keep the standard
+# red(warm)-white-blue(cool) RdBu_r. precip uses a custom brown-yellow
+# (drier) -> white -> blue (wetter) diverging map instead of RdBu_r, so dry
+# years/regions read as earthy brown/tan rather than red (which otherwise
+# reads as "warmer," not "drier," and is easy to confuse with the temp maps).
+PRECIP_CMAP = LinearSegmentedColormap.from_list(
+    "brown_yellow_to_blue",
+    ["#5c3a0a", "#a9701f", "#d9a441", "#f3e6c8", "#f5f5f5",
+     "#cfe6f0", "#6baed6", "#2b6a9e", "#08306b"]
+)
+
+VAR_CMAP = {
+    "airTmax": "RdBu_r",
+    "airTmin": "RdBu_r",
+    "precip": PRECIP_CMAP,
 }
 
 # precip cells with a historical (obs) climatology below this are excluded
@@ -85,7 +114,8 @@ MIN_OBS_PRECIP_FOR_PCT = 0.1  # mm/day
 # immediate neighbors. Flag as an outlier if the deviation exceeds
 # DESPECKLE_FACTOR times the local median absolute deviation (MAD) of those
 # neighbors. Flagged cells are set to NaN (same treatment as any other
-# masked-out cell -- shows as blank/white on the map).
+# masked-out cell -- shows as blank/white on the map, until fill_isolated_
+# nan_gaps below fills them back in from their neighbors).
 # ---------------------------------------------------------------------------
 DESPECKLE_WINDOW = 5          # 5x5 neighborhood (24 surrounding cells) -- wider
                                # than 3x3 so small islands (Nantucket, Martha's
@@ -135,6 +165,51 @@ def despeckle_isolated_outliers(da, window=DESPECKLE_WINDOW, factor=DESPECKLE_FA
 
     cleaned = np.where(is_outlier, np.nan, vals)
     return xr.DataArray(cleaned, coords=da.coords, dims=da.dims, attrs=da.attrs)
+
+
+# ---------------------------------------------------------------------------
+# Gap-fill: fills NaN cells (left behind by despeckle above, or by small
+# clip-edge/regrid gaps) using the mean of their valid immediate neighbors --
+# but ONLY when enough neighbors actually have data. This never changes a
+# cell that already has a value (unlike despeckle, which can only remove
+# values, this can only add them back), and it never fabricates a value in
+# a large contiguous NaN region (e.g. open ocean) where there isn't enough
+# local support to justify a fill. Same approach already used for the S/P
+# ratio ensemble maps' blank-spot fix.
+# ---------------------------------------------------------------------------
+GAPFILL_WINDOW = 3
+GAPFILL_MIN_VALID_NEIGHBORS = 4
+
+
+def fill_isolated_nan_gaps(da, window=GAPFILL_WINDOW, min_valid_neighbors=GAPFILL_MIN_VALID_NEIGHBORS, label=""):
+    """Fill NaN cells with the mean of their valid immediate neighbors,
+    provided at least min_valid_neighbors of them have real data."""
+    vals = da.values.astype(float)
+    ny, nx = vals.shape
+    pad = window // 2
+    padded = np.pad(vals, pad, mode='edge')
+
+    neighbor_stack = []
+    for dy in range(window):
+        for dx in range(window):
+            if dy == pad and dx == pad:
+                continue  # skip the center cell itself
+            neighbor_stack.append(padded[dy:dy + ny, dx:dx + nx])
+    neighbor_stack = np.stack(neighbor_stack, axis=0)
+
+    with np.errstate(invalid='ignore'):
+        n_valid = np.sum(~np.isnan(neighbor_stack), axis=0)
+        neighbor_mean = np.nanmean(neighbor_stack, axis=0)
+
+    is_nan = np.isnan(vals)
+    can_fill = is_nan & (n_valid >= min_valid_neighbors)
+    n_filled = int(np.sum(can_fill))
+    if n_filled > 0:
+        tag = f" [{label}]" if label else ""
+        print(f"    [gapfill{tag}] filled {n_filled} NaN cell(s) from neighbor mean")
+
+    filled = np.where(can_fill, neighbor_mean, vals)
+    return xr.DataArray(filled, coords=da.coords, dims=da.dims, attrs=da.attrs)
 
 
 # ---------------------------------------------------------------------------
@@ -401,8 +476,8 @@ def compute_weighted_ensemble(data_dict, weights, label=""):
 
 
 def mask_beyond_limit(bias_da, limit, label=""):
-    """Set any cell with |bias| > limit to NaN (hardcoded out, per the
-    fixed +/-limit color scale used for these plots)."""
+    """Set any cell with |bias| > limit to NaN (hard sanity-bound cutoff,
+    independent of the DISPLAY color scale computed below)."""
     n_before = int((~np.isnan(bias_da)).sum())
     masked = bias_da.where(np.abs(bias_da) <= limit)
     n_after = int((~np.isnan(masked)).sum())
@@ -412,22 +487,55 @@ def mask_beyond_limit(bias_da, limit, label=""):
     return masked
 
 
-def plot_bias_map(var, bias_da, region_label, state_borders, out_name, period_label="1980-2014"):
+# ---------------------------------------------------------------------------
+# Data-driven DISPLAY color scale: separate from BIAS_SCALE_LIMIT above
+# (which remains a fixed, hard sanity-bound outlier cutoff, unchanged). The
+# problem this fixes: a flat +/-100% scale for precip made real variation
+# (which rarely exceeds +/-30-40%) nearly invisible, since almost the whole
+# map fell within a tiny sliver of the colormap's range.
+#
+# vmax is computed once per variable, from the FIRST season processed for
+# that variable (98th percentile of |bias|, capped at BIAS_SCALE_LIMIT so it
+# can never exceed the sanity bound), then reused as a FIXED value across
+# every other season's plots for that variable -- same "one shared scale
+# per variable" principle as before, just data-driven instead of a flat
+# guess, so seasons stay directly comparable to each other.
+# ---------------------------------------------------------------------------
+DISPLAY_SCALE_PERCENTILE = 98
+_display_scale_limit = {}
+
+
+def get_display_scale_limit(var, bias_da, season_key=""):
+    if var not in _display_scale_limit:
+        vals = bias_da.values
+        vals = np.abs(vals[~np.isnan(vals)])
+        if vals.size:
+            limit = float(np.percentile(vals, DISPLAY_SCALE_PERCENTILE))
+        else:
+            limit = BIAS_SCALE_LIMIT[var]
+        limit = min(limit, BIAS_SCALE_LIMIT[var])
+        _display_scale_limit[var] = limit
+        print(f"  [scale] {var}: display color limit fixed at +/-{limit:.2f} "
+              f"({DISPLAY_SCALE_PERCENTILE}th percentile of |bias|, from {season_key})")
+    return _display_scale_limit[var]
+
+
+def plot_bias_map(var, bias_da, region_label, state_borders, out_name, period_label="1980-2014",
+                   season_key=""):
     """Single-panel diverging bias map (model ensemble - obs), using the
-    fixed +/-BIAS_SCALE_LIMIT[var] color scale (not auto-computed from
-    this map's own data), so every plot for a given variable is directly
-    comparable regardless of run-to-run outlier count."""
+    fixed DISPLAY_LIMIT[var] +/- color scale (clips/saturates colors at the
+    ends -- does not delete any data, unlike BIAS_SCALE_LIMIT)."""
     vals = bias_da.values
     vals = vals[~np.isnan(vals)]
     if vals.size == 0:
         print(f"No valid data for {var} ({region_label}); skipping.")
         return
-    abs_max = BIAS_SCALE_LIMIT[var]
+    abs_max = DISPLAY_LIMIT[var]
     vmin, vmax = -abs_max, abs_max
 
     fig, ax = plt.subplots(figsize=(7, 6), constrained_layout=True)
     mesh = ax.pcolormesh(bias_da['lon'], bias_da['lat'], bias_da.values,
-                          cmap='RdBu_r', vmin=vmin, vmax=vmax, shading='auto')
+                          cmap=VAR_CMAP[var], vmin=vmin, vmax=vmax, shading='auto')
     try:
         state_borders.boundary.plot(ax=ax, linewidth=0.5, color='black', alpha=0.6)
     except Exception:
@@ -438,10 +546,15 @@ def plot_bias_map(var, bias_da, region_label, state_borders, out_name, period_la
     warm_word = "wetter" if var == "precip" else "warmer"
     cool_word = "drier" if var == "precip" else "cooler"
     cbar = fig.colorbar(mesh, ax=ax, shrink=0.85, label=f'Ensemble bias ({VAR_LABELS[var]})')
-    cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+    # integer-only tick locations (not just integer-rounded labels on
+    # whatever ticks happened to land -- that produced duplicate "1"/"1" or
+    # "-0"/"-0" labels before)
+    cbar.locator = MaxNLocator(integer=True)
+    cbar.update_ticks()
+    cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
 
     ax.set_title(
-        f'{region_label} Weighted-Ensemble Bias, Model \u2212 Obs, {period_label}: {VAR_LABELS[var]}\n'
+        f'{region_label} Weighted-Ensemble Bias, Model − Obs, {period_label}: {VAR_LABELS[var]}\n'
         f'Red = {warm_word}, Blue = {cool_word}, White = 0',
         fontsize=11, fontweight='bold')
 
@@ -451,9 +564,11 @@ def plot_bias_map(var, bias_da, region_label, state_borders, out_name, period_la
     print(f"Saved {out_path}")
 
 
-def plot_combined_bias_map(region_label, bias_dict, state_borders, out_name, period_label="1980-2014"):
+def plot_combined_bias_map(region_label, bias_dict, state_borders, out_name, period_label="1980-2014",
+                            season_key=""):
     """One figure, one panel per variable (airTmax, airTmin, precip), each
-    using its own fixed +/-BIAS_SCALE_LIMIT[var] color scale."""
+    using its own fixed DISPLAY_LIMIT[var] +/- color scale (clips/saturates
+    colors at the ends -- does not delete any data, unlike BIAS_SCALE_LIMIT)."""
     var_order = [v for v in variables_config if v in bias_dict]
     fig, axes = plt.subplots(1, len(var_order), figsize=(6 * len(var_order), 6),
                               constrained_layout=True)
@@ -466,10 +581,10 @@ def plot_combined_bias_map(region_label, bias_dict, state_borders, out_name, per
         if vals.size == 0:
             ax.axis('off')
             continue
-        abs_max = BIAS_SCALE_LIMIT[var]
+        abs_max = DISPLAY_LIMIT[var]
         vmin, vmax = -abs_max, abs_max
 
-        mesh = ax.pcolormesh(da['lon'], da['lat'], da.values, cmap='RdBu_r',
+        mesh = ax.pcolormesh(da['lon'], da['lat'], da.values, cmap=VAR_CMAP[var],
                               vmin=vmin, vmax=vmax, shading='auto')
         try:
             state_borders.boundary.plot(ax=ax, linewidth=0.5, color='black', alpha=0.6)
@@ -480,9 +595,11 @@ def plot_combined_bias_map(region_label, bias_dict, state_borders, out_name, per
         ax.set_title(VAR_LABELS[var], fontsize=11)
 
         cbar = fig.colorbar(mesh, ax=ax, shrink=0.8)
-        cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+        cbar.locator = MaxNLocator(integer=True)
+        cbar.update_ticks()
+        cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
 
-    fig.suptitle(f'{region_label} Weighted-Ensemble Bias, Model \u2212 Obs, {period_label}',
+    fig.suptitle(f'{region_label} Weighted-Ensemble Bias, Model − Obs, {period_label}',
                  fontsize=14, fontweight='bold')
 
     out_path = os.path.join(OUTPUT_DIR, out_name)
@@ -573,17 +690,23 @@ for season_key, season_info in SEASON_DEFINITIONS.items():
             # single-cell noise into a large percentage
             ensemble_bias_conus = despeckle_isolated_outliers(ensemble_bias_conus, label=f"ensemble/{var}/{season_key}/pct")
 
+        # gap-fill NaN cells left by despeckle (and any small clip-edge/
+        # regrid gaps) using their valid neighbors' mean, BEFORE the hard
+        # sanity-bound mask below -- this is what removes the white/blank
+        # speckles from the final maps
+        ensemble_bias_conus = fill_isolated_nan_gaps(ensemble_bias_conus, label=f"ensemble/{var}/{season_key}")
+
         ensemble_bias_conus = mask_beyond_limit(ensemble_bias_conus, BIAS_SCALE_LIMIT[var], label=f"{var}/{season_key}")
 
         plot_bias_map(var, ensemble_bias_conus, "CONUS", conus_borders,
                       f"conus_{var}_bias_ensemble_weighted_{season_key}.png",
-                      period_label=period_label)
+                      period_label=period_label, season_key=season_key)
 
         print(f"  Clipping ensemble bias to Northeast...")
         ensemble_bias_ne = clip_to_boundary(ensemble_bias_conus, ne_geom)
         plot_bias_map(var, ensemble_bias_ne, "Northeast", ne_borders,
                       f"northeast_{var}_bias_ensemble_weighted_{season_key}.png",
-                      period_label=period_label)
+                      period_label=period_label, season_key=season_key)
 
         ensemble_bias_conus_all[var] = ensemble_bias_conus
         ensemble_bias_ne_all[var] = ensemble_bias_ne
@@ -591,10 +714,10 @@ for season_key, season_info in SEASON_DEFINITIONS.items():
     if ensemble_bias_conus_all:
         plot_combined_bias_map("CONUS", ensemble_bias_conus_all, conus_borders,
                                 f"conus_allvars_bias_ensemble_weighted_{season_key}.png",
-                                period_label=period_label)
+                                period_label=period_label, season_key=season_key)
     if ensemble_bias_ne_all:
         plot_combined_bias_map("Northeast", ensemble_bias_ne_all, ne_borders,
                                 f"northeast_allvars_bias_ensemble_weighted_{season_key}.png",
-                                period_label=period_label)
+                                period_label=period_label, season_key=season_key)
 
 print("\nProcess complete")

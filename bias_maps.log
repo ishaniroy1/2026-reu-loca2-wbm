@@ -1,0 +1,954 @@
+nohup: ignoring input
+NOTE: no weight defined for ['GFDL-CM4', 'KACE-1-0-G'] -- these will be excluded from the weighted ensemble if found on disk.
+Loading CONUS boundary from /net/home/wsag/ir1101/LOCA2-WBM_code/shapefiles/states/cb_2025_us_state_5m.shp
+Loading Northeast boundary from /net/home/wsag/ir1101/LOCA2-WBM_code/shapefiles/states/cb_2025_us_state_5m.shp
+
+======================================================================
+SEASON: Winter (Dec-Feb)
+======================================================================
+
+--- Processing variable: airTmax (winter, weighted ensemble bias) ---
+Computing Livneh [airTmax] winter climatology (CONUS-clipped, common reference grid)...
+  Computing ACCESS-CM2 [airTmax] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ACCESS-CM2/airTmax/winter]] flagged 2156 isolated outlier cell(s) as NaN
+  Computing ACCESS-ESM1-5 [airTmax] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ACCESS-ESM1-5/airTmax/winter]] flagged 2169 isolated outlier cell(s) as NaN
+  Computing BCC-CSM2-MR [airTmax] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [BCC-CSM2-MR/airTmax/winter]] flagged 2197 isolated outlier cell(s) as NaN
+  Computing CanESM5 [airTmax] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [CanESM5/airTmax/winter]] flagged 2152 isolated outlier cell(s) as NaN
+  Computing EC-Earth3-Veg [airTmax] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [EC-Earth3-Veg/airTmax/winter]] flagged 2093 isolated outlier cell(s) as NaN
+  Computing EC-Earth3 [airTmax] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [EC-Earth3/airTmax/winter]] flagged 2119 isolated outlier cell(s) as NaN
+  Computing GFDL-ESM4 [airTmax] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [GFDL-ESM4/airTmax/winter]] flagged 2171 isolated outlier cell(s) as NaN
+  Computing INM-CM4-8 [airTmax] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [INM-CM4-8/airTmax/winter]] flagged 2138 isolated outlier cell(s) as NaN
+  Skipping INM-CM5-0 [airTmax]: no files found at /net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_historical/INM-CM5-0_historical_1980-2014_newprcp/monthly/airTmax/wbm_*.nc
+  Computing IPSL-CM6A-LR [airTmax] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [IPSL-CM6A-LR/airTmax/winter]] flagged 2162 isolated outlier cell(s) as NaN
+  Computing MIROC6 [airTmax] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MIROC6/airTmax/winter]] flagged 2118 isolated outlier cell(s) as NaN
+  Computing MPI-ESM1-2-HR [airTmax] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MPI-ESM1-2-HR/airTmax/winter]] flagged 2154 isolated outlier cell(s) as NaN
+  Computing MPI-ESM1-2-LR [airTmax] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MPI-ESM1-2-LR/airTmax/winter]] flagged 2160 isolated outlier cell(s) as NaN
+  Computing MRI-ESM2-0 [airTmax] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MRI-ESM2-0/airTmax/winter]] flagged 2145 isolated outlier cell(s) as NaN
+  Computing NorESM2-LM [airTmax] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [NorESM2-LM/airTmax/winter]] flagged 2151 isolated outlier cell(s) as NaN
+  Computing NorESM2-MM [airTmax] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [NorESM2-MM/airTmax/winter]] flagged 2090 isolated outlier cell(s) as NaN
+  Building weighted ensemble (15 models)...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:202: RuntimeWarning: Mean of empty slice
+  neighbor_mean = np.nanmean(neighbor_stack, axis=0)
+    [gapfill [ensemble/airTmax/winter]] filled 1065 NaN cell(s) from neighbor mean
+    [mask [airTmax/winter]] excluded 343 cell(s) with |bias| > 4.0
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/conus_airTmax_bias_ensemble_weighted_winter.png
+  Clipping ensemble bias to Northeast...
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/northeast_airTmax_bias_ensemble_weighted_winter.png
+
+--- Processing variable: airTmin (winter, weighted ensemble bias) ---
+Computing Livneh [airTmin] winter climatology (CONUS-clipped, common reference grid)...
+  Computing ACCESS-CM2 [airTmin] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ACCESS-CM2/airTmin/winter]] flagged 2129 isolated outlier cell(s) as NaN
+  Computing ACCESS-ESM1-5 [airTmin] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ACCESS-ESM1-5/airTmin/winter]] flagged 2127 isolated outlier cell(s) as NaN
+  Computing BCC-CSM2-MR [airTmin] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [BCC-CSM2-MR/airTmin/winter]] flagged 2180 isolated outlier cell(s) as NaN
+  Computing CanESM5 [airTmin] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [CanESM5/airTmin/winter]] flagged 2150 isolated outlier cell(s) as NaN
+  Computing EC-Earth3-Veg [airTmin] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [EC-Earth3-Veg/airTmin/winter]] flagged 2086 isolated outlier cell(s) as NaN
+  Computing EC-Earth3 [airTmin] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [EC-Earth3/airTmin/winter]] flagged 2111 isolated outlier cell(s) as NaN
+  Computing GFDL-ESM4 [airTmin] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [GFDL-ESM4/airTmin/winter]] flagged 2164 isolated outlier cell(s) as NaN
+  Computing INM-CM4-8 [airTmin] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [INM-CM4-8/airTmin/winter]] flagged 2147 isolated outlier cell(s) as NaN
+  Skipping INM-CM5-0 [airTmin]: no files found at /net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_historical/INM-CM5-0_historical_1980-2014_newprcp/monthly/airTmin/wbm_*.nc
+  Computing IPSL-CM6A-LR [airTmin] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [IPSL-CM6A-LR/airTmin/winter]] flagged 2118 isolated outlier cell(s) as NaN
+  Computing MIROC6 [airTmin] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MIROC6/airTmin/winter]] flagged 2163 isolated outlier cell(s) as NaN
+  Computing MPI-ESM1-2-HR [airTmin] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MPI-ESM1-2-HR/airTmin/winter]] flagged 2135 isolated outlier cell(s) as NaN
+  Computing MPI-ESM1-2-LR [airTmin] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MPI-ESM1-2-LR/airTmin/winter]] flagged 2138 isolated outlier cell(s) as NaN
+  Computing MRI-ESM2-0 [airTmin] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MRI-ESM2-0/airTmin/winter]] flagged 2187 isolated outlier cell(s) as NaN
+  Computing NorESM2-LM [airTmin] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [NorESM2-LM/airTmin/winter]] flagged 2146 isolated outlier cell(s) as NaN
+  Computing NorESM2-MM [airTmin] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [NorESM2-MM/airTmin/winter]] flagged 2151 isolated outlier cell(s) as NaN
+  Building weighted ensemble (15 models)...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:202: RuntimeWarning: Mean of empty slice
+  neighbor_mean = np.nanmean(neighbor_stack, axis=0)
+    [gapfill [ensemble/airTmin/winter]] filled 1110 NaN cell(s) from neighbor mean
+    [mask [airTmin/winter]] excluded 440 cell(s) with |bias| > 4.0
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/conus_airTmin_bias_ensemble_weighted_winter.png
+  Clipping ensemble bias to Northeast...
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/northeast_airTmin_bias_ensemble_weighted_winter.png
+
+--- Processing variable: precip (winter, weighted ensemble bias) ---
+Computing Livneh [precip] winter climatology (CONUS-clipped, common reference grid)...
+  Computing ACCESS-CM2 [precip] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ACCESS-CM2/precip/winter]] flagged 1966 isolated outlier cell(s) as NaN
+  Computing ACCESS-ESM1-5 [precip] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ACCESS-ESM1-5/precip/winter]] flagged 1833 isolated outlier cell(s) as NaN
+  Computing BCC-CSM2-MR [precip] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [BCC-CSM2-MR/precip/winter]] flagged 1904 isolated outlier cell(s) as NaN
+  Computing CanESM5 [precip] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [CanESM5/precip/winter]] flagged 1683 isolated outlier cell(s) as NaN
+  Computing EC-Earth3-Veg [precip] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [EC-Earth3-Veg/precip/winter]] flagged 1849 isolated outlier cell(s) as NaN
+  Computing EC-Earth3 [precip] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [EC-Earth3/precip/winter]] flagged 1881 isolated outlier cell(s) as NaN
+  Computing GFDL-ESM4 [precip] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [GFDL-ESM4/precip/winter]] flagged 1891 isolated outlier cell(s) as NaN
+  Computing INM-CM4-8 [precip] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [INM-CM4-8/precip/winter]] flagged 1792 isolated outlier cell(s) as NaN
+  Skipping INM-CM5-0 [precip]: no files found at /net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_historical/INM-CM5-0_historical_1980-2014_newprcp/monthly/precip/wbm_*.nc
+  Computing IPSL-CM6A-LR [precip] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [IPSL-CM6A-LR/precip/winter]] flagged 1737 isolated outlier cell(s) as NaN
+  Computing MIROC6 [precip] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MIROC6/precip/winter]] flagged 1775 isolated outlier cell(s) as NaN
+  Computing MPI-ESM1-2-HR [precip] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MPI-ESM1-2-HR/precip/winter]] flagged 1837 isolated outlier cell(s) as NaN
+  Computing MPI-ESM1-2-LR [precip] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MPI-ESM1-2-LR/precip/winter]] flagged 1789 isolated outlier cell(s) as NaN
+  Computing MRI-ESM2-0 [precip] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MRI-ESM2-0/precip/winter]] flagged 1876 isolated outlier cell(s) as NaN
+  Computing NorESM2-LM [precip] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [NorESM2-LM/precip/winter]] flagged 1873 isolated outlier cell(s) as NaN
+  Computing NorESM2-MM [precip] winter climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [NorESM2-MM/precip/winter]] flagged 1908 isolated outlier cell(s) as NaN
+  Building weighted ensemble (15 models)...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ensemble/precip/winter/pct]] flagged 1341 isolated outlier cell(s) as NaN
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:202: RuntimeWarning: Mean of empty slice
+  neighbor_mean = np.nanmean(neighbor_stack, axis=0)
+    [gapfill [ensemble/precip/winter]] filled 1894 NaN cell(s) from neighbor mean
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/conus_precip_bias_ensemble_weighted_winter.png
+  Clipping ensemble bias to Northeast...
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/northeast_precip_bias_ensemble_weighted_winter.png
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/conus_allvars_bias_ensemble_weighted_winter.png
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/northeast_allvars_bias_ensemble_weighted_winter.png
+
+======================================================================
+SEASON: Cold Season (Nov-Apr)
+======================================================================
+
+--- Processing variable: airTmax (cold_season, weighted ensemble bias) ---
+Computing Livneh [airTmax] cold_season climatology (CONUS-clipped, common reference grid)...
+  Computing ACCESS-CM2 [airTmax] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ACCESS-CM2/airTmax/cold_season]] flagged 2220 isolated outlier cell(s) as NaN
+  Computing ACCESS-ESM1-5 [airTmax] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ACCESS-ESM1-5/airTmax/cold_season]] flagged 2239 isolated outlier cell(s) as NaN
+  Computing BCC-CSM2-MR [airTmax] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [BCC-CSM2-MR/airTmax/cold_season]] flagged 2243 isolated outlier cell(s) as NaN
+  Computing CanESM5 [airTmax] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [CanESM5/airTmax/cold_season]] flagged 2236 isolated outlier cell(s) as NaN
+  Computing EC-Earth3-Veg [airTmax] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [EC-Earth3-Veg/airTmax/cold_season]] flagged 2203 isolated outlier cell(s) as NaN
+  Computing EC-Earth3 [airTmax] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [EC-Earth3/airTmax/cold_season]] flagged 2214 isolated outlier cell(s) as NaN
+  Computing GFDL-ESM4 [airTmax] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [GFDL-ESM4/airTmax/cold_season]] flagged 2275 isolated outlier cell(s) as NaN
+  Computing INM-CM4-8 [airTmax] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [INM-CM4-8/airTmax/cold_season]] flagged 2261 isolated outlier cell(s) as NaN
+  Skipping INM-CM5-0 [airTmax]: no files found at /net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_historical/INM-CM5-0_historical_1980-2014_newprcp/monthly/airTmax/wbm_*.nc
+  Computing IPSL-CM6A-LR [airTmax] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [IPSL-CM6A-LR/airTmax/cold_season]] flagged 2259 isolated outlier cell(s) as NaN
+  Computing MIROC6 [airTmax] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MIROC6/airTmax/cold_season]] flagged 2210 isolated outlier cell(s) as NaN
+  Computing MPI-ESM1-2-HR [airTmax] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MPI-ESM1-2-HR/airTmax/cold_season]] flagged 2235 isolated outlier cell(s) as NaN
+  Computing MPI-ESM1-2-LR [airTmax] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MPI-ESM1-2-LR/airTmax/cold_season]] flagged 2232 isolated outlier cell(s) as NaN
+  Computing MRI-ESM2-0 [airTmax] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MRI-ESM2-0/airTmax/cold_season]] flagged 2198 isolated outlier cell(s) as NaN
+  Computing NorESM2-LM [airTmax] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [NorESM2-LM/airTmax/cold_season]] flagged 2192 isolated outlier cell(s) as NaN
+  Computing NorESM2-MM [airTmax] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [NorESM2-MM/airTmax/cold_season]] flagged 2160 isolated outlier cell(s) as NaN
+  Building weighted ensemble (15 models)...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:202: RuntimeWarning: Mean of empty slice
+  neighbor_mean = np.nanmean(neighbor_stack, axis=0)
+    [gapfill [ensemble/airTmax/cold_season]] filled 1129 NaN cell(s) from neighbor mean
+    [mask [airTmax/cold_season]] excluded 443 cell(s) with |bias| > 4.0
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/conus_airTmax_bias_ensemble_weighted_cold_season.png
+  Clipping ensemble bias to Northeast...
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/northeast_airTmax_bias_ensemble_weighted_cold_season.png
+
+--- Processing variable: airTmin (cold_season, weighted ensemble bias) ---
+Computing Livneh [airTmin] cold_season climatology (CONUS-clipped, common reference grid)...
+  Computing ACCESS-CM2 [airTmin] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ACCESS-CM2/airTmin/cold_season]] flagged 2179 isolated outlier cell(s) as NaN
+  Computing ACCESS-ESM1-5 [airTmin] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ACCESS-ESM1-5/airTmin/cold_season]] flagged 2156 isolated outlier cell(s) as NaN
+  Computing BCC-CSM2-MR [airTmin] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [BCC-CSM2-MR/airTmin/cold_season]] flagged 2156 isolated outlier cell(s) as NaN
+  Computing CanESM5 [airTmin] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [CanESM5/airTmin/cold_season]] flagged 2106 isolated outlier cell(s) as NaN
+  Computing EC-Earth3-Veg [airTmin] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [EC-Earth3-Veg/airTmin/cold_season]] flagged 2155 isolated outlier cell(s) as NaN
+  Computing EC-Earth3 [airTmin] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [EC-Earth3/airTmin/cold_season]] flagged 2152 isolated outlier cell(s) as NaN
+  Computing GFDL-ESM4 [airTmin] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [GFDL-ESM4/airTmin/cold_season]] flagged 2179 isolated outlier cell(s) as NaN
+  Computing INM-CM4-8 [airTmin] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [INM-CM4-8/airTmin/cold_season]] flagged 2163 isolated outlier cell(s) as NaN
+  Skipping INM-CM5-0 [airTmin]: no files found at /net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_historical/INM-CM5-0_historical_1980-2014_newprcp/monthly/airTmin/wbm_*.nc
+  Computing IPSL-CM6A-LR [airTmin] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [IPSL-CM6A-LR/airTmin/cold_season]] flagged 2173 isolated outlier cell(s) as NaN
+  Computing MIROC6 [airTmin] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MIROC6/airTmin/cold_season]] flagged 2181 isolated outlier cell(s) as NaN
+  Computing MPI-ESM1-2-HR [airTmin] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MPI-ESM1-2-HR/airTmin/cold_season]] flagged 2188 isolated outlier cell(s) as NaN
+  Computing MPI-ESM1-2-LR [airTmin] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MPI-ESM1-2-LR/airTmin/cold_season]] flagged 2176 isolated outlier cell(s) as NaN
+  Computing MRI-ESM2-0 [airTmin] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MRI-ESM2-0/airTmin/cold_season]] flagged 2135 isolated outlier cell(s) as NaN
+  Computing NorESM2-LM [airTmin] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [NorESM2-LM/airTmin/cold_season]] flagged 2150 isolated outlier cell(s) as NaN
+  Computing NorESM2-MM [airTmin] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [NorESM2-MM/airTmin/cold_season]] flagged 2174 isolated outlier cell(s) as NaN
+  Building weighted ensemble (15 models)...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:202: RuntimeWarning: Mean of empty slice
+  neighbor_mean = np.nanmean(neighbor_stack, axis=0)
+    [gapfill [ensemble/airTmin/cold_season]] filled 1157 NaN cell(s) from neighbor mean
+    [mask [airTmin/cold_season]] excluded 424 cell(s) with |bias| > 4.0
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/conus_airTmin_bias_ensemble_weighted_cold_season.png
+  Clipping ensemble bias to Northeast...
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/northeast_airTmin_bias_ensemble_weighted_cold_season.png
+
+--- Processing variable: precip (cold_season, weighted ensemble bias) ---
+Computing Livneh [precip] cold_season climatology (CONUS-clipped, common reference grid)...
+  Computing ACCESS-CM2 [precip] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ACCESS-CM2/precip/cold_season]] flagged 1991 isolated outlier cell(s) as NaN
+  Computing ACCESS-ESM1-5 [precip] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ACCESS-ESM1-5/precip/cold_season]] flagged 1870 isolated outlier cell(s) as NaN
+  Computing BCC-CSM2-MR [precip] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [BCC-CSM2-MR/precip/cold_season]] flagged 1995 isolated outlier cell(s) as NaN
+  Computing CanESM5 [precip] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [CanESM5/precip/cold_season]] flagged 1891 isolated outlier cell(s) as NaN
+  Computing EC-Earth3-Veg [precip] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [EC-Earth3-Veg/precip/cold_season]] flagged 1930 isolated outlier cell(s) as NaN
+  Computing EC-Earth3 [precip] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [EC-Earth3/precip/cold_season]] flagged 1816 isolated outlier cell(s) as NaN
+  Computing GFDL-ESM4 [precip] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [GFDL-ESM4/precip/cold_season]] flagged 1997 isolated outlier cell(s) as NaN
+  Computing INM-CM4-8 [precip] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [INM-CM4-8/precip/cold_season]] flagged 1921 isolated outlier cell(s) as NaN
+  Skipping INM-CM5-0 [precip]: no files found at /net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_historical/INM-CM5-0_historical_1980-2014_newprcp/monthly/precip/wbm_*.nc
+  Computing IPSL-CM6A-LR [precip] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [IPSL-CM6A-LR/precip/cold_season]] flagged 1896 isolated outlier cell(s) as NaN
+  Computing MIROC6 [precip] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MIROC6/precip/cold_season]] flagged 1845 isolated outlier cell(s) as NaN
+  Computing MPI-ESM1-2-HR [precip] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MPI-ESM1-2-HR/precip/cold_season]] flagged 1986 isolated outlier cell(s) as NaN
+  Computing MPI-ESM1-2-LR [precip] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MPI-ESM1-2-LR/precip/cold_season]] flagged 1882 isolated outlier cell(s) as NaN
+  Computing MRI-ESM2-0 [precip] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MRI-ESM2-0/precip/cold_season]] flagged 1873 isolated outlier cell(s) as NaN
+  Computing NorESM2-LM [precip] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [NorESM2-LM/precip/cold_season]] flagged 1888 isolated outlier cell(s) as NaN
+  Computing NorESM2-MM [precip] cold_season climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [NorESM2-MM/precip/cold_season]] flagged 1970 isolated outlier cell(s) as NaN
+  Building weighted ensemble (15 models)...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ensemble/precip/cold_season/pct]] flagged 1381 isolated outlier cell(s) as NaN
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:202: RuntimeWarning: Mean of empty slice
+  neighbor_mean = np.nanmean(neighbor_stack, axis=0)
+    [gapfill [ensemble/precip/cold_season]] filled 1971 NaN cell(s) from neighbor mean
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/conus_precip_bias_ensemble_weighted_cold_season.png
+  Clipping ensemble bias to Northeast...
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/northeast_precip_bias_ensemble_weighted_cold_season.png
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/conus_allvars_bias_ensemble_weighted_cold_season.png
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/northeast_allvars_bias_ensemble_weighted_cold_season.png
+
+======================================================================
+SEASON: Water Year (Oct-Sep)
+======================================================================
+
+--- Processing variable: airTmax (water_year, weighted ensemble bias) ---
+Computing Livneh [airTmax] water_year climatology (CONUS-clipped, common reference grid)...
+  Computing ACCESS-CM2 [airTmax] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ACCESS-CM2/airTmax/water_year]] flagged 2231 isolated outlier cell(s) as NaN
+  Computing ACCESS-ESM1-5 [airTmax] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ACCESS-ESM1-5/airTmax/water_year]] flagged 2262 isolated outlier cell(s) as NaN
+  Computing BCC-CSM2-MR [airTmax] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [BCC-CSM2-MR/airTmax/water_year]] flagged 2240 isolated outlier cell(s) as NaN
+  Computing CanESM5 [airTmax] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [CanESM5/airTmax/water_year]] flagged 2213 isolated outlier cell(s) as NaN
+  Computing EC-Earth3-Veg [airTmax] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [EC-Earth3-Veg/airTmax/water_year]] flagged 2231 isolated outlier cell(s) as NaN
+  Computing EC-Earth3 [airTmax] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [EC-Earth3/airTmax/water_year]] flagged 2247 isolated outlier cell(s) as NaN
+  Computing GFDL-ESM4 [airTmax] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [GFDL-ESM4/airTmax/water_year]] flagged 2250 isolated outlier cell(s) as NaN
+  Computing INM-CM4-8 [airTmax] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [INM-CM4-8/airTmax/water_year]] flagged 2240 isolated outlier cell(s) as NaN
+  Skipping INM-CM5-0 [airTmax]: no files found at /net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_historical/INM-CM5-0_historical_1980-2014_newprcp/monthly/airTmax/wbm_*.nc
+  Computing IPSL-CM6A-LR [airTmax] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [IPSL-CM6A-LR/airTmax/water_year]] flagged 2294 isolated outlier cell(s) as NaN
+  Computing MIROC6 [airTmax] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MIROC6/airTmax/water_year]] flagged 2235 isolated outlier cell(s) as NaN
+  Computing MPI-ESM1-2-HR [airTmax] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MPI-ESM1-2-HR/airTmax/water_year]] flagged 2265 isolated outlier cell(s) as NaN
+  Computing MPI-ESM1-2-LR [airTmax] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MPI-ESM1-2-LR/airTmax/water_year]] flagged 2269 isolated outlier cell(s) as NaN
+  Computing MRI-ESM2-0 [airTmax] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MRI-ESM2-0/airTmax/water_year]] flagged 2239 isolated outlier cell(s) as NaN
+  Computing NorESM2-LM [airTmax] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [NorESM2-LM/airTmax/water_year]] flagged 2238 isolated outlier cell(s) as NaN
+  Computing NorESM2-MM [airTmax] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [NorESM2-MM/airTmax/water_year]] flagged 2211 isolated outlier cell(s) as NaN
+  Building weighted ensemble (15 models)...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:202: RuntimeWarning: Mean of empty slice
+  neighbor_mean = np.nanmean(neighbor_stack, axis=0)
+    [gapfill [ensemble/airTmax/water_year]] filled 1187 NaN cell(s) from neighbor mean
+    [mask [airTmax/water_year]] excluded 516 cell(s) with |bias| > 4.0
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/conus_airTmax_bias_ensemble_weighted_water_year.png
+  Clipping ensemble bias to Northeast...
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/northeast_airTmax_bias_ensemble_weighted_water_year.png
+
+--- Processing variable: airTmin (water_year, weighted ensemble bias) ---
+Computing Livneh [airTmin] water_year climatology (CONUS-clipped, common reference grid)...
+  Computing ACCESS-CM2 [airTmin] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ACCESS-CM2/airTmin/water_year]] flagged 2182 isolated outlier cell(s) as NaN
+  Computing ACCESS-ESM1-5 [airTmin] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ACCESS-ESM1-5/airTmin/water_year]] flagged 2196 isolated outlier cell(s) as NaN
+  Computing BCC-CSM2-MR [airTmin] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [BCC-CSM2-MR/airTmin/water_year]] flagged 2162 isolated outlier cell(s) as NaN
+  Computing CanESM5 [airTmin] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [CanESM5/airTmin/water_year]] flagged 2161 isolated outlier cell(s) as NaN
+  Computing EC-Earth3-Veg [airTmin] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [EC-Earth3-Veg/airTmin/water_year]] flagged 2202 isolated outlier cell(s) as NaN
+  Computing EC-Earth3 [airTmin] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [EC-Earth3/airTmin/water_year]] flagged 2200 isolated outlier cell(s) as NaN
+  Computing GFDL-ESM4 [airTmin] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [GFDL-ESM4/airTmin/water_year]] flagged 2199 isolated outlier cell(s) as NaN
+  Computing INM-CM4-8 [airTmin] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [INM-CM4-8/airTmin/water_year]] flagged 2161 isolated outlier cell(s) as NaN
+  Skipping INM-CM5-0 [airTmin]: no files found at /net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_historical/INM-CM5-0_historical_1980-2014_newprcp/monthly/airTmin/wbm_*.nc
+  Computing IPSL-CM6A-LR [airTmin] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [IPSL-CM6A-LR/airTmin/water_year]] flagged 2201 isolated outlier cell(s) as NaN
+  Computing MIROC6 [airTmin] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MIROC6/airTmin/water_year]] flagged 2213 isolated outlier cell(s) as NaN
+  Computing MPI-ESM1-2-HR [airTmin] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MPI-ESM1-2-HR/airTmin/water_year]] flagged 2236 isolated outlier cell(s) as NaN
+  Computing MPI-ESM1-2-LR [airTmin] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MPI-ESM1-2-LR/airTmin/water_year]] flagged 2173 isolated outlier cell(s) as NaN
+  Computing MRI-ESM2-0 [airTmin] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MRI-ESM2-0/airTmin/water_year]] flagged 2204 isolated outlier cell(s) as NaN
+  Computing NorESM2-LM [airTmin] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [NorESM2-LM/airTmin/water_year]] flagged 2145 isolated outlier cell(s) as NaN
+  Computing NorESM2-MM [airTmin] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [NorESM2-MM/airTmin/water_year]] flagged 2184 isolated outlier cell(s) as NaN
+  Building weighted ensemble (15 models)...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:202: RuntimeWarning: Mean of empty slice
+  neighbor_mean = np.nanmean(neighbor_stack, axis=0)
+    [gapfill [ensemble/airTmin/water_year]] filled 1196 NaN cell(s) from neighbor mean
+    [mask [airTmin/water_year]] excluded 507 cell(s) with |bias| > 4.0
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/conus_airTmin_bias_ensemble_weighted_water_year.png
+  Clipping ensemble bias to Northeast...
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/northeast_airTmin_bias_ensemble_weighted_water_year.png
+
+--- Processing variable: precip (water_year, weighted ensemble bias) ---
+Computing Livneh [precip] water_year climatology (CONUS-clipped, common reference grid)...
+  Computing ACCESS-CM2 [precip] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ACCESS-CM2/precip/water_year]] flagged 1856 isolated outlier cell(s) as NaN
+  Computing ACCESS-ESM1-5 [precip] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ACCESS-ESM1-5/precip/water_year]] flagged 1832 isolated outlier cell(s) as NaN
+  Computing BCC-CSM2-MR [precip] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [BCC-CSM2-MR/precip/water_year]] flagged 1911 isolated outlier cell(s) as NaN
+  Computing CanESM5 [precip] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [CanESM5/precip/water_year]] flagged 1811 isolated outlier cell(s) as NaN
+  Computing EC-Earth3-Veg [precip] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [EC-Earth3-Veg/precip/water_year]] flagged 1844 isolated outlier cell(s) as NaN
+  Computing EC-Earth3 [precip] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [EC-Earth3/precip/water_year]] flagged 1806 isolated outlier cell(s) as NaN
+  Computing GFDL-ESM4 [precip] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [GFDL-ESM4/precip/water_year]] flagged 1947 isolated outlier cell(s) as NaN
+  Computing INM-CM4-8 [precip] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [INM-CM4-8/precip/water_year]] flagged 1832 isolated outlier cell(s) as NaN
+  Skipping INM-CM5-0 [precip]: no files found at /net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_historical/INM-CM5-0_historical_1980-2014_newprcp/monthly/precip/wbm_*.nc
+  Computing IPSL-CM6A-LR [precip] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [IPSL-CM6A-LR/precip/water_year]] flagged 1810 isolated outlier cell(s) as NaN
+  Computing MIROC6 [precip] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MIROC6/precip/water_year]] flagged 1774 isolated outlier cell(s) as NaN
+  Computing MPI-ESM1-2-HR [precip] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MPI-ESM1-2-HR/precip/water_year]] flagged 1844 isolated outlier cell(s) as NaN
+  Computing MPI-ESM1-2-LR [precip] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MPI-ESM1-2-LR/precip/water_year]] flagged 1808 isolated outlier cell(s) as NaN
+  Computing MRI-ESM2-0 [precip] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [MRI-ESM2-0/precip/water_year]] flagged 1810 isolated outlier cell(s) as NaN
+  Computing NorESM2-LM [precip] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [NorESM2-LM/precip/water_year]] flagged 1720 isolated outlier cell(s) as NaN
+  Computing NorESM2-MM [precip] water_year climatology...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [NorESM2-MM/precip/water_year]] flagged 1875 isolated outlier cell(s) as NaN
+  Building weighted ensemble (15 models)...
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:154: RuntimeWarning: All-NaN slice encountered
+  local_median = np.nanmedian(neighbor_stack, axis=0)
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:155: RuntimeWarning: All-NaN slice encountered
+  local_mad = np.nanmedian(np.abs(neighbor_stack - local_median), axis=0)
+    [despeckle [ensemble/precip/water_year/pct]] flagged 1277 isolated outlier cell(s) as NaN
+/net/home/wsag/ir1101/LOCA2-WBM_code/ensemble_weighted_bias_maps.py:202: RuntimeWarning: Mean of empty slice
+  neighbor_mean = np.nanmean(neighbor_stack, axis=0)
+    [gapfill [ensemble/precip/water_year]] filled 1860 NaN cell(s) from neighbor mean
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/conus_precip_bias_ensemble_weighted_water_year.png
+  Clipping ensemble bias to Northeast...
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/northeast_precip_bias_ensemble_weighted_water_year.png
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/conus_allvars_bias_ensemble_weighted_water_year.png
+Saved /net/home/wsag/ir1101/LOCA2-WBM_code/plots/ensemble_bias_maps/northeast_allvars_bias_ensemble_weighted_water_year.png
+
+Process complete
