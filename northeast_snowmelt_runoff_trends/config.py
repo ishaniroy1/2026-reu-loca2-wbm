@@ -169,3 +169,5 @@ CDO_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 PLOTS_DIR = OUTPUT_DIR / "plots"
 PLOTS_DIR.mkdir(parents=True, exist_ok=True)
+
+WINTER_MONTHS = (12, 1, 2)  # Dec-Feb, meteorological winter

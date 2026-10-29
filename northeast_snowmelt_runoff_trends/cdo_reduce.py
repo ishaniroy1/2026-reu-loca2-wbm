@@ -242,6 +242,30 @@ def cold_season_sums(gcm_run_dir, varname, out_dir=None):
                  f"-selname,{varname}", str(merged), str(out_file)], out_file)
     return out_file
 
+def winter_sums(gcm_run_dir, varname, out_dir=None):
+    """
+    Winter (config.WINTER_MONTHS, Dec-Feb) sum of `varname`, one value per
+    grid cell per winter, labeled by the Jan/Feb calendar year (Dec(Y-1)-
+    Feb(Y) -> labeled Y). Cached.
+    """
+    _require_cdo()
+    gcm_run_dir = Path(gcm_run_dir)
+    out_dir = Path(out_dir or config.CDO_CACHE_DIR)
+    merged = get_merged(gcm_run_dir, [config.VAR_PRECIP_TOTAL, config.VAR_SNOW], out_dir)
+
+    tag = gcm_run_dir.name
+    months_str = ",".join(str(m) for m in config.WINTER_MONTHS)
+    out_file = out_dir / f"{tag}__{varname}__winter_sum.nc"
+    if _cache_ok(out_file, [merged]):
+        log.info(f"    [cache hit] {out_file.name}")
+        return out_file
+
+    # selmon picks Dec/Jan/Feb only, then a +1mon shift lands Dec(Y-1) in
+    # Jan(Y) alongside Jan(Y)->Feb(Y) and Feb(Y)->Mar(Y), so all three
+    # months fall inside one calendar year before yearsum groups them
+    _run_atomic(["cdo", "-O", "yearsum", "-shifttime,1mon", f"-selmon,{months_str}",
+                 f"-selname,{varname}", str(merged), str(out_file)], out_file)
+    return out_file
 
 def get_or_build(gcm_run_dir, varname, window="water_year", out_dir=None):
     """Convenience dispatcher; returns the cached netCDF path for either window."""
@@ -249,5 +273,7 @@ def get_or_build(gcm_run_dir, varname, window="water_year", out_dir=None):
         return water_year_sums(gcm_run_dir, varname, out_dir=out_dir)
     elif window == "cold_season":
         return cold_season_sums(gcm_run_dir, varname, out_dir=out_dir)
+    elif window == "winter":
+        return winter_sums(gcm_run_dir, varname, out_dir=out_dir)
     else:
-        raise ValueError(f"Unknown window '{window}'; expected 'water_year' or 'cold_season'")
+        raise ValueError(f"Unknown window '{window}'; expected 'water_year', 'cold_season', or 'winter'")
