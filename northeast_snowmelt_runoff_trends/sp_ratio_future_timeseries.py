@@ -26,6 +26,11 @@ ending/Sep year -- same convention as the rest of the project):
 A water-year bin is kept only if all 12 of its months are present (drops
 the always-partial year at each end of a model's record).
 
+POSTER VERSION: all text sizes and line widths enlarged for legibility on a
+36x44 in scientific poster. Legend moved below the axes so the larger text
+doesn't cover the data or the era labels. Tweak the FONT_* constants below
+if you need to scale text up or down further.
+
 Run with: python sp_ratio_future_timeseries.py
 """
 
@@ -47,6 +52,26 @@ SHAPEFILE_PATH = os.path.expanduser(
     "~/LOCA2-WBM_code/shapefiles/states/cb_2025_us_state_5m.shp")
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+# ---- poster text sizing (points, at the figure's native 14 in width) ----
+FONT_TITLE = 24
+FONT_AXIS_LABEL = 22
+FONT_TICK = 20
+FONT_LEGEND = 18
+FONT_ERA = 19
+
+# line widths (bumped up so they hold up at poster scale)
+LW_ENSEMBLE_HIST = 4.0
+LW_ENSEMBLE_FUT = 3.5
+LW_MODEL = 0.9
+
+plt.rcParams.update({
+    'axes.linewidth': 1.8,
+    'xtick.major.width': 1.8,
+    'ytick.major.width': 1.8,
+    'xtick.major.size': 8,
+    'ytick.major.size': 8,
+})
 
 # region setup
 nca_ne_states = ['ME', 'NH', 'VT', 'MA', 'RI',
@@ -148,14 +173,14 @@ print("Computing Northeast historical (GCM-driven) ensemble S/P ratio, 1980-2014
 hist_folders = sorted(glob.glob(os.path.join(MODEL_DIR_HIST, "*_newprcp")))
 hist_per_model, hist_ensemble = ensemble_series(hist_folders, northeast_gdf, tag="historical")
 
-fig, ax = plt.subplots(figsize=(14, 6.5))
+fig, ax = plt.subplots(figsize=(14, 7.5))
 
 if not hist_ensemble.empty:
     for name, series in hist_per_model.items():
         ax.plot(series.index, series.values, color=HIST_COLOR,
-                linewidth=0.6, alpha=0.25, zorder=1, label='_nolegend_')
+                linewidth=LW_MODEL, alpha=0.25, zorder=1, label='_nolegend_')
     ax.plot(hist_ensemble.index, hist_ensemble.values, color=HIST_COLOR,
-            linewidth=2.5, zorder=3,
+            linewidth=LW_ENSEMBLE_HIST, zorder=3,
             label=f'Historical Ensemble, GCM-driven ({len(hist_per_model)} models, 1980-2014)')
     bridge_year = int(hist_ensemble.index[-1])
     bridge_value = float(hist_ensemble.values[-1])
@@ -175,7 +200,7 @@ for ssp_key, ssp_info in scenarios.items():
 
     for name, series in per_model.items():
         ax.plot(series.index, series.values, color=ssp_info['color'],
-                linewidth=0.6, alpha=0.35, zorder=1, label='_nolegend_')
+                linewidth=LW_MODEL, alpha=0.35, zorder=1, label='_nolegend_')
 
     years_connected = ensemble.index.values
     values_connected = ensemble.values
@@ -184,8 +209,8 @@ for ssp_key, ssp_info in scenarios.items():
         values_connected = np.concatenate([[bridge_value], values_connected])
 
     ax.plot(years_connected, values_connected, color=ssp_info['color'],
-            linewidth=2, zorder=3,
-            label=f"{ssp_info['label']} ({len(per_model)} models)")
+            linewidth=LW_ENSEMBLE_FUT, zorder=3,
+            label=f"{ssp_info['label']}")
 
 # era shading
 ax.axvspan(2015, 2040, color='royalblue', alpha=0.03)
@@ -194,27 +219,32 @@ ax.axvspan(2071, 2100, color='crimson', alpha=0.03)
 
 ax.autoscale_view()
 y_lo, y_hi = ax.get_ylim()
-y_text_pos = y_lo + (y_hi - y_lo) * 0.92
+y_text_pos = y_lo + (y_hi - y_lo) * 0.97
 
 ax.text(2027, y_text_pos, 'Early-Century\n(2015-2040)', ha='center',
-        va='top', fontsize=9, style='italic', color='navy')
+        va='top', fontsize=FONT_ERA, style='italic', color='navy')
 ax.text(2055, y_text_pos, 'Mid-Century\n(2041-2070)', ha='center',
-        va='top', fontsize=9, style='italic', color='darkgoldenrod')
+        va='top', fontsize=FONT_ERA, style='italic', color='darkgoldenrod')
 ax.text(2085, y_text_pos, 'Late-Century\n(2071-2100)', ha='center',
-        va='top', fontsize=9, style='italic', color='darkred')
+        va='top', fontsize=FONT_ERA, style='italic', color='darkred')
 
-ax.set_ylabel("S/P Ratio (snow / total precip)", fontsize=12)
-ax.set_xlabel("Water Year (Oct-Sep, labeled by ending year)", fontsize=12)
+ax.set_ylabel("S/P Ratio (snow / total precip)", fontsize=FONT_AXIS_LABEL)
+ax.set_xlabel("Water Year (Oct-Sep, labeled by ending year)", fontsize=FONT_AXIS_LABEL)
 ax.set_title(
     "Northeast Region S/P Ratio: Historical Ensemble and Future Projections (1980-2100)",
-    fontsize=13, fontweight='bold')
+    fontsize=FONT_TITLE, fontweight='bold', pad=14)
+ax.tick_params(axis='both', which='major', labelsize=FONT_TICK)
 
 ax.grid(True, linestyle=':', alpha=0.5)
-ax.legend(loc='upper left', framealpha=0.9, fontsize=9)
+
+# legend below the axes (2 columns) so large text doesn't cover the data
+# or the era labels
+ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.14), ncol=2,
+          framealpha=0.9, fontsize=FONT_LEGEND, handlelength=2.5)
 plt.tight_layout()
 
 output_plot = os.path.join(OUTPUT_DIR, "sp_ratio_future_timeseries.png")
-plt.savefig(output_plot, dpi=300)
+plt.savefig(output_plot, dpi=300, bbox_inches='tight')
 plt.close()
 
 print(f"Completed plot written to {output_plot}")

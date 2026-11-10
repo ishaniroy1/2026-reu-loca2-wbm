@@ -1,5 +1,5 @@
 """
-figures_sp_ratio_overview.py
+sp_ratio_figures.py
 =============================
 Summary figures for the Northeast snowmelt/runoff trends project, ensemble-
 mean S/P ratio (averaged across all available GCMs -- see
@@ -48,6 +48,16 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 import geopandas as gpd
 
+# Poster-scale font sizes (36x44 scientific poster -- default/journal-scale
+# fonts are too small to read from a few feet away). figsize/dpi are left
+# unchanged, so this increases the text-to-figure ratio, which is what
+# matters once an image is blown up to poster size.
+POSTER_FONT = {"suptitle": 24, "title": 20, "subplot_title": 20, "cbar_label": 20, "cbar_ticks": 18}
+plt.rcParams.update({
+    "font.size": 16, "axes.labelsize": 18, "legend.fontsize": 16,
+    "xtick.labelsize": 16, "ytick.labelsize": 16,
+})
+
 import config
 import io_utils
 import climatology
@@ -88,7 +98,7 @@ def _draw_sp_ratio(ax, da, ne_borders, vmin=0, vmax=1, cmap=SP_RATIO_CMAP, title
         ne_borders.boundary.plot(ax=ax, linewidth=0.4, color="black", alpha=0.6)
     except Exception:
         pass
-    ax.set_title(title, fontsize=11)
+    ax.set_title(title, fontsize=POSTER_FONT["subplot_title"])
     ax.set_xlabel("")
     ax.set_ylabel("")
     ax.set_xticks([])
@@ -128,8 +138,10 @@ def build_historical_figure(ne_borders, window):
     fig.suptitle(
         f"Northeast US Snow-to-Precipitation Ratio \u2014 Historical Baseline\n"
         f"({WINDOW_LABELS[window]}, ensemble mean of {len(per_model)} models)",
-        fontsize=13, fontweight="bold")
-    cbar = fig.colorbar(mesh, ax=ax, shrink=0.85, label="S/P ratio")
+        fontsize=POSTER_FONT["suptitle"], fontweight="bold")
+    cbar = fig.colorbar(mesh, ax=ax, shrink=0.85)
+    cbar.set_label("S/P ratio", fontsize=POSTER_FONT["cbar_label"])
+    cbar.ax.tick_params(labelsize=POSTER_FONT["cbar_ticks"])
     cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 
     out_path = config.PLOTS_DIR / f"sp_ratio_historical_{window}.png"
@@ -175,7 +187,7 @@ def build_future_period_figure(period_name, period_label, ne_borders, window, vm
 
         if entry is None:
             ax.axis("off")
-            ax.set_title(f"{scen_label}\n(no data)", fontsize=11)
+            ax.set_title(f"{scen_label}\n(no data)", fontsize=POSTER_FONT["subplot_title"])
             continue
 
         da, n_models = entry
@@ -184,10 +196,12 @@ def build_future_period_figure(period_name, period_label, ne_borders, window, vm
     fig.suptitle(
         f"Northeast US Snow-to-Precipitation Ratio \u2014 {period_label}\n"
         f"({WINDOW_LABELS[window]}, ensemble mean per scenario)",
-        fontsize=14, fontweight="bold")
+        fontsize=POSTER_FONT["suptitle"], fontweight="bold")
 
     if mesh is not None:
-        cbar = fig.colorbar(mesh, ax=axes.tolist(), shrink=0.8, label="S/P ratio")
+        cbar = fig.colorbar(mesh, ax=axes.tolist(), shrink=0.8)
+        cbar.set_label("S/P ratio", fontsize=POSTER_FONT["cbar_label"])
+        cbar.ax.tick_params(labelsize=POSTER_FONT["cbar_ticks"])
         cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 
     out_path = config.PLOTS_DIR / f"sp_ratio_{period_name}_{window}.png"
@@ -195,14 +209,91 @@ def build_future_period_figure(period_name, period_label, ne_borders, window, vm
     plt.close(fig)
     log.info(f"Saved {out_path}")
 
+    # Returned so build_future_grid_figure() can reuse these already-computed
+    # per-scenario ensembles (climatology.multi_model_climatology is the
+    # expensive step here) instead of recomputing them for the combined grid.
+    return panels
+
+
+PERIOD_ROW_LABELS = {
+    "mid_century": "Mid-century\n(2040-2070)",
+    "late_century": "Late-century\n(2070-2100)",
+}
+PERIOD_ORDER = ["mid_century", "late_century"]
+
+
+def build_future_grid_figure(ne_borders, window, vmax, period_panels):
+    """Combined 2 (mid-century / late-century) x 3 (SSP2-4.5 / SSP3-7.0 /
+    SSP5-8.5) grid for one window -- one row per period, one column per
+    scenario, sharing a single colorbar. For the poster version of this
+    project's "future projections" figure.
+
+    period_panels is {"mid_century": panels, "late_century": panels}, where
+    each panels dict is exactly what build_future_period_figure() already
+    computed (and now also returns) for that period -- so this function does
+    NOT rerun climatology.multi_model_climatology(); it only re-draws.
+
+    Color scheme and scale are deliberately unchanged from the rest of this
+    script: same SP_RATIO_CMAP (Purples_r) and the same vmax passed in from
+    build_historical_figure() for this window, so this combined figure stays
+    visually consistent with the individual historical/mid/late figures.
+    """
+    log.info(f"Building combined future S/P ratio grid: {window} ...")
+    scenarios = config.SCENARIOS
+    n_rows, n_cols = len(PERIOD_ORDER), len(scenarios)
+
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(5.0 * n_cols, 4.6 * n_rows),
+                              constrained_layout=True)
+    axes = np.atleast_2d(axes)
+
+    mesh = None
+    for row, period_name in enumerate(PERIOD_ORDER):
+        panels = period_panels.get(period_name) or {}
+        for col, scenario in enumerate(scenarios):
+            ax = axes[row, col]
+            entry = panels.get(scenario)
+            scen_label = config.SCENARIO_LABELS.get(scenario, scenario).split(" (")[0]
+
+            if entry is None:
+                ax.axis("off")
+            else:
+                da, n_models = entry
+                mesh = _draw_sp_ratio(ax, da, ne_borders, vmin=0, vmax=vmax, title="")
+
+            if row == 0:
+                ax.set_title(scen_label, fontsize=POSTER_FONT["subplot_title"])
+            if col == 0:
+                ax.set_ylabel(PERIOD_ROW_LABELS[period_name],
+                               fontsize=POSTER_FONT["subplot_title"], fontweight="bold")
+                ax.yaxis.set_label_coords(-0.1, 0.5)
+
+    window_label_plain = window.replace("_", " ")
+    fig.suptitle(
+        f"Northeast US Snow-to-Precipitation Ratio — Future Projections\n"
+        f"({window_label_plain}, ensemble mean per scenario/period)",
+        fontsize=POSTER_FONT["suptitle"], fontweight="bold")
+
+    if mesh is not None:
+        cbar = fig.colorbar(mesh, ax=axes.ravel().tolist(), shrink=0.8)
+        cbar.set_label("S/P ratio", fontsize=POSTER_FONT["cbar_label"])
+        cbar.ax.tick_params(labelsize=POSTER_FONT["cbar_ticks"])
+        cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+
+    out_path = config.PLOTS_DIR / f"sp_ratio_future_grid_{window}.png"
+    fig.savefig(out_path, dpi=200)
+    plt.close(fig)
+    log.info(f"  Saved {out_path}")
+
 
 def main():
     ne_borders = _load_ne_state_outlines()
     for window in WINDOWS:
         log.info(f"\n{'=' * 60}\nWINDOW: {WINDOW_LABELS[window]}\n{'=' * 60}")
         vmax = build_historical_figure(ne_borders, window)
-        build_future_period_figure("mid_century", "Mid-Century (2040-2070)", ne_borders, window, vmax)
-        build_future_period_figure("late_century", "Late-Century (2070-2100)", ne_borders, window, vmax)
+        mid_panels = build_future_period_figure("mid_century", "Mid-Century (2040-2070)", ne_borders, window, vmax)
+        late_panels = build_future_period_figure("late_century", "Late-Century (2070-2100)", ne_borders, window, vmax)
+        build_future_grid_figure(ne_borders, window, vmax,
+                                  {"mid_century": mid_panels, "late_century": late_panels})
     log.info(f"Done. Figures written to {config.PLOTS_DIR}, grids written to {GRIDS_DIR}")
 
 

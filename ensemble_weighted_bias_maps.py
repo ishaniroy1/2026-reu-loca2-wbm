@@ -57,6 +57,29 @@ VAR_LABELS = {
 FILL_VALUE = -9999.0
 FILL_ABS_THRESHOLD = 1e10
 
+# ---------------------------------------------------------------------------
+# Poster-scale font sizes (these figures are going on a 36x44 scientific
+# poster, so default/journal-article-scale fonts are much too small to read
+# from a few feet away). figsize/dpi are left unchanged, so bumping these
+# font sizes increases the TEXT-TO-FIGURE ratio, which is what actually
+# matters once an image is blown up to poster size.
+# ---------------------------------------------------------------------------
+POSTER_FONT = {
+    "suptitle": 26,
+    "title": 20,
+    "subplot_title": 22,
+    "cbar_label": 20,
+    "cbar_ticks": 18,
+}
+plt.rcParams.update({
+    "font.size": 16,
+    "axes.titlesize": POSTER_FONT["title"],
+    "axes.labelsize": 18,
+    "legend.fontsize": 16,
+    "xtick.labelsize": 16,
+    "ytick.labelsize": 16,
+})
+
 # Hard sanity-bound bias-map cutoff: values beyond this are set to NaN as
 # physically implausible (mask_beyond_limit). This is intentionally generous
 # -- real Tmin/Tmax bias routinely exceeds +/-1 degC in places, so this
@@ -77,8 +100,39 @@ BIAS_SCALE_LIMIT = {
 DISPLAY_LIMIT = {
     "airTmax": 1.0,
     "airTmin": 1.0,
-    "precip": 100.0,
+    "precip": 100.0,  # precip's actual display range is computed from the
+                       # data itself (see get_display_abs_max) -- this value
+                       # is only the fallback if a map has no valid data at all
 }
+
+TEMP_VARS = {"airTmax", "airTmin"}
+
+
+def get_display_abs_max(var, vals):
+    """The +/- color-scale bound for this map. Temp vars use the fixed
+    DISPLAY_LIMIT (+/-1 degC). precip instead uses the actual max |bias|
+    PRESENT IN THIS MAP'S OWN DATA, symmetric around zero (same distance
+    above/below 0) -- a flat +/-100% made real variation (which rarely
+    exceeds +/-20-30%) nearly invisible."""
+    if var == "precip":
+        return float(np.max(np.abs(vals))) if vals.size else DISPLAY_LIMIT[var]
+    return DISPLAY_LIMIT[var]
+
+
+def apply_colorbar_ticks(cbar, var, abs_max):
+    """Temp vars (airTmax/airTmin): explicit half-step ticks at
+    [-abs_max, -abs_max/2, 0, abs_max/2, abs_max] with 1-decimal labels,
+    e.g. -1, -0.5, 0, 0.5, 1. precip: integer-only tick LOCATIONS (not just
+    integer-rounded labels on whatever ticks happened to land, which
+    produced duplicate "1"/"1" labels before) -- needed since precip's
+    scale is now data-driven and can land on any range."""
+    if var in TEMP_VARS:
+        cbar.set_ticks([-abs_max, -abs_max / 2, 0, abs_max / 2, abs_max])
+        cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+    else:
+        cbar.locator = MaxNLocator(integer=True)
+        cbar.update_ticks()
+        cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
 
 # Diverging colormap for each variable. airTmax/airTmin keep the standard
 # red(warm)-white-blue(cool) RdBu_r. precip uses a custom brown-yellow
@@ -122,12 +176,23 @@ DESPECKLE_WINDOW = 5          # 5x5 neighborhood (24 surrounding cells) -- wider
                                # Vineyard, etc.) still have enough candidate
                                # neighbors even though most of a 3x3 window
                                # around them is ocean/NaN
-DESPECKLE_FACTOR = 3.5        # flag if |value - local median| > factor * local MAD
+DESPECKLE_FACTOR = 3.0        # flag if |value - local median| > factor * local MAD
+                               # (tightened from 3.5 -- coastline/island clusters
+                               # a couple of cells wide were surviving a single
+                               # pass; see DESPECKLE_PASSES below)
 DESPECKLE_MIN_NEIGHBORS = 2   # lowered from 4 -- a strict minimum was silently
                                # skipping small islands/sparse coastal cells
                                # (exactly the cells most likely to need this
                                # check), since they rarely have >=4 valid
                                # neighbors in any window
+DESPECKLE_PASSES = 2          # a cell inside a 2-3-cell-wide bad cluster can
+                               # look locally "consistent" with its equally-bad
+                               # neighbors on the first pass (their shared MAD
+                               # looks small), so it isn't flagged; a second
+                               # pass, run after the first pass has already
+                               # NaN'd the easy single-cell outliers, catches
+                               # most of what's left since the cluster now has
+                               # fewer bad neighbors propping up its local MAD
 
 
 def despeckle_isolated_outliers(da, window=DESPECKLE_WINDOW, factor=DESPECKLE_FACTOR,
@@ -165,6 +230,23 @@ def despeckle_isolated_outliers(da, window=DESPECKLE_WINDOW, factor=DESPECKLE_FA
 
     cleaned = np.where(is_outlier, np.nan, vals)
     return xr.DataArray(cleaned, coords=da.coords, dims=da.dims, attrs=da.attrs)
+
+
+def despeckle_multi_pass(da, passes=DESPECKLE_PASSES, label="", **kwargs):
+    """Run despeckle_isolated_outliers repeatedly. A single pass can miss a
+    cluster of 2-3 adjacent bad cells (their shared local MAD looks "normal"
+    to each other), but once the first pass removes whatever easy, truly
+    isolated outliers surrounded that cluster, the cluster's remaining cells
+    often stand out clearly against their now-cleaner neighbors on the next
+    pass. Returns unchanged data once a pass flags nothing new."""
+    for i in range(passes):
+        pass_label = f"{label}/pass{i + 1}" if label else f"pass{i + 1}"
+        before_nan = int(np.sum(np.isnan(da.values)))
+        da = despeckle_isolated_outliers(da, label=pass_label, **kwargs)
+        after_nan = int(np.sum(np.isnan(da.values)))
+        if after_nan == before_nan:
+            break  # nothing new flagged this pass -- later passes won't help either
+    return da
 
 
 # ---------------------------------------------------------------------------
@@ -487,39 +569,6 @@ def mask_beyond_limit(bias_da, limit, label=""):
     return masked
 
 
-# ---------------------------------------------------------------------------
-# Data-driven DISPLAY color scale: separate from BIAS_SCALE_LIMIT above
-# (which remains a fixed, hard sanity-bound outlier cutoff, unchanged). The
-# problem this fixes: a flat +/-100% scale for precip made real variation
-# (which rarely exceeds +/-30-40%) nearly invisible, since almost the whole
-# map fell within a tiny sliver of the colormap's range.
-#
-# vmax is computed once per variable, from the FIRST season processed for
-# that variable (98th percentile of |bias|, capped at BIAS_SCALE_LIMIT so it
-# can never exceed the sanity bound), then reused as a FIXED value across
-# every other season's plots for that variable -- same "one shared scale
-# per variable" principle as before, just data-driven instead of a flat
-# guess, so seasons stay directly comparable to each other.
-# ---------------------------------------------------------------------------
-DISPLAY_SCALE_PERCENTILE = 98
-_display_scale_limit = {}
-
-
-def get_display_scale_limit(var, bias_da, season_key=""):
-    if var not in _display_scale_limit:
-        vals = bias_da.values
-        vals = np.abs(vals[~np.isnan(vals)])
-        if vals.size:
-            limit = float(np.percentile(vals, DISPLAY_SCALE_PERCENTILE))
-        else:
-            limit = BIAS_SCALE_LIMIT[var]
-        limit = min(limit, BIAS_SCALE_LIMIT[var])
-        _display_scale_limit[var] = limit
-        print(f"  [scale] {var}: display color limit fixed at +/-{limit:.2f} "
-              f"({DISPLAY_SCALE_PERCENTILE}th percentile of |bias|, from {season_key})")
-    return _display_scale_limit[var]
-
-
 def plot_bias_map(var, bias_da, region_label, state_borders, out_name, period_label="1980-2014",
                    season_key=""):
     """Single-panel diverging bias map (model ensemble - obs), using the
@@ -530,7 +579,7 @@ def plot_bias_map(var, bias_da, region_label, state_borders, out_name, period_la
     if vals.size == 0:
         print(f"No valid data for {var} ({region_label}); skipping.")
         return
-    abs_max = DISPLAY_LIMIT[var]
+    abs_max = get_display_abs_max(var, vals)
     vmin, vmax = -abs_max, abs_max
 
     fig, ax = plt.subplots(figsize=(7, 6), constrained_layout=True)
@@ -545,18 +594,15 @@ def plot_bias_map(var, bias_da, region_label, state_borders, out_name, period_la
 
     warm_word = "wetter" if var == "precip" else "warmer"
     cool_word = "drier" if var == "precip" else "cooler"
-    cbar = fig.colorbar(mesh, ax=ax, shrink=0.85, label=f'Ensemble bias ({VAR_LABELS[var]})')
-    # integer-only tick locations (not just integer-rounded labels on
-    # whatever ticks happened to land -- that produced duplicate "1"/"1" or
-    # "-0"/"-0" labels before)
-    cbar.locator = MaxNLocator(integer=True)
-    cbar.update_ticks()
-    cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+    cbar = fig.colorbar(mesh, ax=ax, shrink=0.85)
+    cbar.set_label(f'Ensemble bias ({VAR_LABELS[var]})', fontsize=POSTER_FONT["cbar_label"])
+    cbar.ax.tick_params(labelsize=POSTER_FONT["cbar_ticks"])
+    apply_colorbar_ticks(cbar, var, abs_max)
 
     ax.set_title(
         f'{region_label} Weighted-Ensemble Bias, Model − Obs, {period_label}: {VAR_LABELS[var]}\n'
         f'Red = {warm_word}, Blue = {cool_word}, White = 0',
-        fontsize=11, fontweight='bold')
+        fontsize=POSTER_FONT["title"], fontweight='bold')
 
     out_path = os.path.join(OUTPUT_DIR, out_name)
     fig.savefig(out_path, dpi=200)
@@ -581,7 +627,7 @@ def plot_combined_bias_map(region_label, bias_dict, state_borders, out_name, per
         if vals.size == 0:
             ax.axis('off')
             continue
-        abs_max = DISPLAY_LIMIT[var]
+        abs_max = get_display_abs_max(var, vals)
         vmin, vmax = -abs_max, abs_max
 
         mesh = ax.pcolormesh(da['lon'], da['lat'], da.values, cmap=VAR_CMAP[var],
@@ -592,15 +638,14 @@ def plot_combined_bias_map(region_label, bias_dict, state_borders, out_name, per
             pass
         ax.set_xticks([])
         ax.set_yticks([])
-        ax.set_title(VAR_LABELS[var], fontsize=11)
+        ax.set_title(VAR_LABELS[var], fontsize=POSTER_FONT["subplot_title"])
 
         cbar = fig.colorbar(mesh, ax=ax, shrink=0.8)
-        cbar.locator = MaxNLocator(integer=True)
-        cbar.update_ticks()
-        cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+        cbar.ax.tick_params(labelsize=POSTER_FONT["cbar_ticks"])
+        apply_colorbar_ticks(cbar, var, abs_max)
 
     fig.suptitle(f'{region_label} Weighted-Ensemble Bias, Model − Obs, {period_label}',
-                 fontsize=14, fontweight='bold')
+                 fontsize=POSTER_FONT["suptitle"], fontweight='bold')
 
     out_path = os.path.join(OUTPUT_DIR, out_name)
     fig.savefig(out_path, dpi=200)
@@ -663,7 +708,7 @@ for season_key, season_info in SEASON_DEFINITIONS.items():
                 # despeckle BEFORE adding to the ensemble -- a coastline/island
                 # regrid artifact in one model shouldn't get baked into the
                 # weighted ensemble at that cell (see DESPECKLE_* config above)
-                model_bias = despeckle_isolated_outliers(model_bias, label=f"{name}/{var}/{season_key}")
+                model_bias = despeckle_multi_pass(model_bias, label=f"{name}/{var}/{season_key}")
                 model_bias_common[name] = model_bias
             except Exception as e:
                 print(f"  Skipping model {name} [{var}] due to calculation mismatch: {e}")
@@ -675,6 +720,13 @@ for season_key, season_info in SEASON_DEFINITIONS.items():
 
         print(f"  Building weighted ensemble ({len(model_bias_common)} models)...")
         ensemble_bias_conus = compute_weighted_ensemble(model_bias_common, MODEL_WEIGHTS, label=f"{var}/{season_key}")
+
+        # despeckle the ensemble itself (ALL variables, not just precip) --
+        # the weighted average can still produce a residual coastline/island
+        # artifact that wasn't quite strong enough to get flagged in any one
+        # model, but becomes visible once several models' edge effects line
+        # up at the same cell
+        ensemble_bias_conus = despeckle_multi_pass(ensemble_bias_conus, label=f"ensemble/{var}/{season_key}")
 
         if var == 'precip':
             # convert absolute bias (mm/day) to percent bias relative to obs;
@@ -688,7 +740,7 @@ for season_key, season_info in SEASON_DEFINITIONS.items():
             # re-despeckle after the percent-bias conversion -- dividing by a
             # small-but-not-excluded obs value can still amplify any residual
             # single-cell noise into a large percentage
-            ensemble_bias_conus = despeckle_isolated_outliers(ensemble_bias_conus, label=f"ensemble/{var}/{season_key}/pct")
+            ensemble_bias_conus = despeckle_multi_pass(ensemble_bias_conus, label=f"ensemble/{var}/{season_key}/pct")
 
         # gap-fill NaN cells left by despeckle (and any small clip-edge/
         # regrid gaps) using their valid neighbors' mean, BEFORE the hard
