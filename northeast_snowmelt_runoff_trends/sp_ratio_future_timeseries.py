@@ -42,7 +42,7 @@ import regionmask
 # map scripts -- historical and future runs live in sibling directories)
 MODEL_DIR_HIST = "/net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_historical"
 MODEL_DIR_FUT = "/net/nfs/echo/ankaa/LOCA2-WBM_output/LOCA2-WBM_future"
-OUTPUT_DIR = os.path.expanduser("~/LOCA2-WBM_code/plots")
+OUTPUT_DIR = os.path.expanduser("~/LOCA2-WBM_code/northeast_snowmelt_runoff_trends/outputs")
 SHAPEFILE_PATH = os.path.expanduser(
     "~/LOCA2-WBM_code/shapefiles/states/cb_2025_us_state_5m.shp")
 
@@ -57,7 +57,7 @@ northeast_gdf = states_gdf[states_gdf['STUSPS'].isin(nca_ne_states)]
 VAR_PRECIP = "precip"
 VAR_SNOW = "snowFall"
 
-# set up 3 scenarios (same labels/colors as future_timeseries_plot.py)
+# set up 3 scenarios 
 scenarios = {
     'ssp245': {'label': 'SSP2-4.5 (Middle of the Road)', 'color': 'darkorange'},
     'ssp370': {'label': 'SSP3-7.0 (Regional Rivalry)', 'color': 'purple'},
@@ -187,7 +187,7 @@ for ssp_key, ssp_info in scenarios.items():
             linewidth=2, zorder=3,
             label=f"{ssp_info['label']} ({len(per_model)} models)")
 
-# era shading (same breakpoints as future_timeseries_plot.py)
+# era shading
 ax.axvspan(2015, 2040, color='royalblue', alpha=0.03)
 ax.axvspan(2041, 2070, color='darkorange', alpha=0.03)
 ax.axvspan(2071, 2100, color='crimson', alpha=0.03)
@@ -206,8 +206,7 @@ ax.text(2085, y_text_pos, 'Late-Century\n(2071-2100)', ha='center',
 ax.set_ylabel("S/P Ratio (snow / total precip)", fontsize=12)
 ax.set_xlabel("Water Year (Oct-Sep, labeled by ending year)", fontsize=12)
 ax.set_title(
-    "Northeast Region S/P Ratio: Historical Ensemble → Future Projections (1980-2100)\n"
-    "No independent S/P-ratio observations exist -- historical line is GCM/WBM-driven, not observed",
+    "Northeast Region S/P Ratio: Historical Ensemble and Future Projections (1980-2100)",
     fontsize=13, fontweight='bold')
 
 ax.grid(True, linestyle=':', alpha=0.5)
